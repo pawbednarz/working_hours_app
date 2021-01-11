@@ -25,7 +25,6 @@ class LoginController {
     }
 
     public function action_logout() {
-        echo "wylogowano";
         session_destroy();
         App::getRouter()->redirectTo("login");
     }

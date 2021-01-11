@@ -66,7 +66,6 @@ class Validator {
             if ($escape) {
                 if ($only_script) {
                     $value = preg_replace('#<script(.*?)>(.*?)</script>#is', '', $value);
-                    echo $value;
                 } else {
                     $value = filter_var($value, FILTER_SANITIZE_SPECIAL_CHARS);
                 }

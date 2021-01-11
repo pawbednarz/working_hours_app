@@ -15,10 +15,10 @@
         <tbody>
         {foreach $entries as $entry}
         <tr>
-            <td>{$entry["place"]}</td>
+            <td>{($entry["place"]) ? $entry["place"] : "---"}</td>
             <td>{$entry["from_date"]}</td>
-            <td>{$entry["to_date"]}</td>
-            <td>{$entry["hours"]}</td>
+            <td>{($entry["to_date"]) ? $entry["to_date"] : "---"}</td>
+            <td>{($entry["hours"]) ? $entry["hours"] : "---"}</td>
             <td>{($entry["was_driver"]) ? "Tak" : "Nie"}</td>
             <td>{($entry["subsistence_allowance"]) ? "Tak" : "Nie"}</td>
             <td>{($entry["day_off"]) ? "Tak" : "Nie"}</td>

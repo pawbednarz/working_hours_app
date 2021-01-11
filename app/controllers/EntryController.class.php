@@ -55,10 +55,11 @@ class EntryController {
             if ($validationResult) {
                 if ($this->dayOff) {
                     $this->addDayOffEntry($this->fromDate);
+                } else {
+                    $this->addEntry($this->place, $this->fromDate, $this->toDate, $this->wasDriver,
+                        $this->subAllowance, 0);
                 }
             }
-
-            App::getMessages()->addMessage(new Message("Pomyślnie dodano wpis dla dnia $this->fromDate", Message::INFO));
             $this->renderTemplate("addEntry.tpl");
         }
     }
@@ -92,19 +93,25 @@ class EntryController {
         $year = date("Y", strtotime($fromDate));
         $monthIdx = intval(date("m", strtotime($fromDate)));
         $month = $this->months[$monthIdx - 1];
-        App::getDB()->insert("work_hour_entry", [
-            "uuid"=>generate_uuid(),
-            "from_date"=> $fromDate,
-            "to_date"=> $toDate,
-            // TODO count from hours
-            "hours"=> 8,
-            "place"=>$place,
-            "was_driver"=>$wasDriver ? 1 : 0,
-            "subsistence_allowance"=>$subAllowance ? 1 : 0,
-            "year"=>$year,
-            "month"=>$month,
-            "day_off"=>$dayOff ? 1 : 0
-        ]);
+        if ($this->checkAnotherEntryForSameDay($fromDate, $year, $month)){
+            App::getMessages()->addMessage(new Message("Wpis dla dnia " . $fromDate . " już istnieje. 
+            Aby wprowadzić nowy wpis dla danego dnia edytuj istniejący, lub usuń go i dodaj nowy.", Message::INFO));
+        } else {
+            App::getDB()->insert("work_hour_entry", [
+                "uuid"=>generate_uuid(),
+                "from_date"=> $fromDate,
+                "to_date"=> $toDate,
+                // TODO count from hours
+                "hours"=> 8,
+                "place"=>$place,
+                "was_driver"=>$wasDriver ? 1 : 0,
+                "subsistence_allowance"=>$subAllowance ? 1 : 0,
+                "year"=>$year,
+                "month"=>$month,
+                "day_off"=>$dayOff ? 1 : 0
+            ]);
+            App::getMessages()->addMessage(new Message("Pomyślnie dodano wpis dla dnia $this->fromDate", Message::INFO));
+        }
     }
 
     private function addDayOffEntry($fromDate) {
@@ -123,27 +130,43 @@ class EntryController {
         $v->validate($fromDate, [
             "required"=>true,
             "required_message"=>'"Data od" jest wymagana przy wprowadzaniu dnia wolnego',
+            "trim"=>true,
+            "min_length"=>10,
+            "max_length"=>10,
             "date_format"=>"Y-m-d",
-            "validator_message"=>'Niepoprawny format "Data od" (wymagany: Y-m-d)'
+            "validator_message"=>'Niepoprawny format "Data od" (wymagany: YYYY-mm-dd)'
         ]);
 
-        return $v->isLastOK();
+        $v->validate($toDate, [
+            "required"=>$paramRequired,
+            "required_message"=>'"Data do" jest wymagana przy wprowadzaniu dnia pracującego',
+            "trim"=>true,
+            "min_length"=>10,
+            "max_length"=>10,
+            "date_format"=>"Y-m-d",
+            "validator_message"=>'Niepoprawny format "Data od" (wymagany: YYYY-mm-dd)'
+        ]);
 
-//        $v = new Validator();
-//        $place = $v->validate($place, [
-//            "escape"=>true,
-//            "trim"=>true,
-//            "required"=>true,
-//            "required_message"=>'Miejsce jest wymagane',
-//            "min_length"=>3,
-//            "max_length"=>90,
-//            "validator_message"=>"Miejsce musi mieć od 3 do 90 znaków",
-//            "message_type"=>info
-//        ]);
-//
-//        $fromDate = $v->validate($fromDate, [
-//
-//        ])
+        $v = new Validator();
+        $place = $v->validate($place, [
+            "escape"=>true,
+            "trim"=>true,
+            "required"=>true,
+            "required_message"=>'Miejsce jest wymagane',
+            "min_length"=>3,
+            "max_length"=>90,
+            "validator_message"=>"Miejsce musi mieć od 3 do 90 znaków"
+        ]);
+
+        return !App::getMessages()->isError();
+    }
+
+    private function checkAnotherEntryForSameDay($fromDate, $year, $month) {
+        return App::getDB()->count("work_hour_entry", [
+            "from_date"=>$fromDate,
+            "year"=>$year,
+            "month"=>$month
+        ]);
     }
 
     private function renderTemplate($template) {
