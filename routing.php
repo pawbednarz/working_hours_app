@@ -8,8 +8,6 @@ App::getRouter()->setLoginRoute('login'); #action to forward if no permissions
 
 Utils::addRoute('addUser', 'UserController');
 
-Utils::addRoute('test', 'NowyCtrl', "user");
-
 // login / logout routes
 Utils::addRoute('login', 'LoginController');
 Utils::addRoute('logout', 'LoginController');

@@ -58,7 +58,7 @@ class EntryController {
                 }
             }
 
-            App::getMessages(new Message("Pomyślnie dodano wpis dla dnia $this->fromDate", Message::INFO));
+            App::getMessages()->addMessage(new Message("Pomyślnie dodano wpis dla dnia $this->fromDate", Message::INFO));
             $this->renderTemplate("addEntry.tpl");
         }
     }
@@ -119,6 +119,7 @@ class EntryController {
             $paramRequired = false;
         }
 
+        // TODO make some more date validation (to prevent from entering input like 0000-00-00)
         $v->validate($fromDate, [
             "required"=>true,
             "required_message"=>'"Data od" jest wymagana przy wprowadzaniu dnia wolnego',
