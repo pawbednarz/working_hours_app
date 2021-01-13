@@ -92,25 +92,30 @@ class LoginController {
     }
 
     private function loginUser($email) {
-        $userData = array();
+        $data = array();
         try {
-            $userData = App::getDB()->select("user", [
+            $data = App::getDB()->select("user", [
+                "uuid",
                 "first_name",
                 "last_name",
                 "role"
             ],[
                 "email"=>$email
             ]);
-            $userData = $userData[0];
+            $data = $data[0];
         } catch (\PDOException $e) {
             // TODO write to logs
             // echo $e
             App::getMessages()->addMessage("Wystąpił błąd podczas logowania użytkownika. Spróbuj ponownie, lub skontaktuj się z administratorem systemu");
         }
         session_start();
-        SessionUtils::store("firstName", $userData["first_name"]);
-        SessionUtils::store("firstName", $userData["last_name"]);
-        RoleUtils::addRole($userData["role"]);
+        RoleUtils::addRole($data["role"]);
+        SessionUtils::store("userUuid", $data["uuid"]);
+        // create userData object to store data of user in there
+        $userData = new \stdClass();
+        $userData->firstName = $data["first_name"];
+        $userData->lastName = $data["last_name"];
+        SessionUtils::store("userData", $userData);
         App::getRouter()->redirectTo("dashboard");
     }
 }

@@ -14,6 +14,7 @@ require_once  'functions.php';
 
 use core\App;
 use core\Config;
+use core\SessionUtils;
 
 $_PARAMS = array(); #global array for parameters from clean URL
 $conf = new Config();
@@ -35,3 +36,6 @@ $conf->action_url = $conf->server_url.$conf->action_root;
 $conf->assets_url = $conf->app_url."/assets/";
 
 App:: createAndInitialize($conf);
+
+// store globally used variable go have access to them from every script
+App::getSmarty()->assign("userData", SessionUtils::load("userData", true));

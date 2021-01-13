@@ -2303,3 +2303,11 @@ button,
   input[disabled], input[disabled] + label {
     background-color: #e6ebed;
   }
+
+  .user-label {
+    display: flex;
+    margin-top: 0px;
+    justify-content: right;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }

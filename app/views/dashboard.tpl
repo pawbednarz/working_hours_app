@@ -10,7 +10,6 @@
 
         </div>
     </div>
-    {$firstName}
     {include file="menu.tpl"}
 
 </div>
