@@ -189,7 +189,7 @@ class Validator {
                 }
             }
         }
-        if ($empty && isset($config['required'])) {
+        if ($empty && isset($config['required']) && $config["required"]) {
             $this->last_validation = false;
             if (isset($config['required_message']))
                 $msgs [] = $config['required_message'];
