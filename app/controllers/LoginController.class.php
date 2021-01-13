@@ -15,6 +15,9 @@ class LoginController {
     private $password;
 
     public function action_login() {
+        if (SessionUtils::load("userData", true) != null) {
+            App::getRouter()->redirectTo("dashboard");
+        }
         $this->email = ParamUtils::getFromPost("email");
         $this->password = ParamUtils::getFromPost("password");
         // if request method is post and validation is okay, login user
