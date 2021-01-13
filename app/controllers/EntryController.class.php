@@ -5,6 +5,7 @@ namespace app\controllers;
 use core\App;
 use core\Message;
 use core\ParamUtils;
+use core\SessionUtils;
 use core\Validator;
 
 class EntryController {
@@ -49,8 +50,7 @@ class EntryController {
             $this->dayOff = ParamUtils::getFromPost("day_off") == "true";
 
             // validate parameters
-            $validationResult = $this->validateEntryData($this->place, $this->fromDate, $this->toDate, $this->wasDriver,
-                $this->subAllowance, $this->dayOff);
+            $validationResult = $this->validateEntryData($this->place, $this->fromDate, $this->toDate, $this->dayOff);
 
             if ($validationResult) {
                 if ($this->dayOff) {
@@ -81,6 +81,7 @@ class EntryController {
             $entries = App::getDB()->select("work_hour_entry", "*", [
                 "month"=>$month,
                 "year"=>$year,
+                "user_uuid"=>SessionUtils::load("userUuid", true),
                 "ORDER"=>"from_date"
             ]);
         } else {
@@ -108,7 +109,8 @@ class EntryController {
                 "subsistence_allowance"=>$subAllowance ? 1 : 0,
                 "year"=>$year,
                 "month"=>$month,
-                "day_off"=>$dayOff ? 1 : 0
+                "day_off"=>$dayOff ? 1 : 0,
+                "user_uuid"=>SessionUtils::load("userUuid", true)
             ]);
             App::getMessages()->addMessage(new Message("Pomyślnie dodano wpis dla dnia $this->fromDate", Message::INFO));
         }
@@ -118,7 +120,7 @@ class EntryController {
         $this->addEntry(null, $fromDate, null, null, null, true);
     }
 
-    private function validateEntryData($place, $fromDate, $toDate, $wasDriver, $subAllowance, $dayOff) {
+    private function validateEntryData($place, $fromDate, $toDate, $dayOff) {
         $paramRequired = true;
         $v = new Validator();
         // if day is off validate date only, and return result
@@ -151,8 +153,8 @@ class EntryController {
         $place = $v->validate($place, [
             "escape"=>true,
             "trim"=>true,
-            "required"=>true,
-            "required_message"=>'Miejsce jest wymagane',
+            "required"=>$paramRequired,
+            "required_message"=>'Miejsce jest wymagane przy wprowadzaniu dnia pracującego',
             "min_length"=>3,
             "max_length"=>90,
             "validator_message"=>"Miejsce musi mieć od 3 do 90 znaków"
@@ -165,7 +167,8 @@ class EntryController {
         return App::getDB()->count("work_hour_entry", [
             "from_date"=>$fromDate,
             "year"=>$year,
-            "month"=>$month
+            "month"=>$month,
+            "user_uuid"=>SessionUtils::load("userUuid", true)
         ]);
     }
 
