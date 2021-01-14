@@ -28,15 +28,19 @@ class EntryController {
     private $wasDriver;
     private $subAllowance;
     private $dayOff;
+    private $currentYear;
+    private $currentMonth;
+
+    function __construct() {
+        $this->currentYear = date("Y");
+        $this->currentMonth = date("M");
+    }
 
     public function action_dashboard() {
-        // get current month and year
-        $currentYear = date("Y");
-        $currentMonth = date("M");
         // cast eng month to pl month
-        $currentMonthPl = $this->monthsPl[array_search($currentMonth, $this->months)];
-        App::getSmarty()->assign("description", "Godziny w bieżącym miesiącu ($currentMonthPl $currentYear)");
-        App::getSmarty()->assign("entries", $this->getEntries($currentYear, $currentMonth));
+        $currentMonthPl = $this->monthsPl[array_search($this->currentMonth, $this->months)];
+        App::getSmarty()->assign("description", "Godziny w bieżącym miesiącu ($currentMonthPl $this->currentYear)");
+        App::getSmarty()->assign("entries", $this->getEntries($this->currentYear, $this->currentMonth));
         $this->renderTemplate("dashboard.tpl");
     }
 
@@ -101,18 +105,19 @@ class EntryController {
             "required_message"=>"Nie podano UUID wpisu do usunięcia",
             "min_lenght"=>36,
             "max_lenhht"=>36,
-            //TODO add regexp check
-            "validator_message"=>"UUID musi składać się z 36 znaków"
+            "regexp"=>"/[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/",
+            "validator_message"=>"UUID musi składać się z 36 znaków i mieć format "
         ]);
 
         if ($v->isLastOK()) {
             $result = $this->deleteEntry($entryUuid);
             if ($result) {
-                App::getMessages(new Message("Pomyślnie usunięto wpis", Message::INFO));
+                App::getMessages()->addMessage(new Message("Pomyślnie usunięto wpis", Message::INFO));
             } else {
-                App::getMessages(new Message("Nie udało się usunąć wpisu", Message::ERROR));
+                App::getMessages()->addMessage(new Message("Nie udało się usunąć wpisu", Message::ERROR));
             }
         }
+        App::getSmarty()->assign("entries", $this->getEntries($this->currentYear, $this->currentMonth));
         App::getSmarty()->display("dashboard.tpl");
     }
 
@@ -163,7 +168,7 @@ class EntryController {
     }
 
     private function addDayOffEntry($fromDate) {
-        $this->addEntry(null, $fromDate, null, null, null, true);
+        $this->addEntry(null, $fromDate, null, null, null, true, 1);
     }
 
     private function deleteEntry($entryUuid) {
