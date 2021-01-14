@@ -5,9 +5,7 @@
         <div class="inner">
 
             {include file="page_header.tpl"}
-            <h4 class="description-header">{$description}</h4>
             {include file="recipientsTable.tpl"}
-
             {include file="messages.tpl"}
         </div>
     </div>
