@@ -10,3 +10,6 @@
         {/if}
     </div>
 </header>
+{if isset($userData)}
+    <h4 class="description-header">{$description}</h4>
+{/if}
