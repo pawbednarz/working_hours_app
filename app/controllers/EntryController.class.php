@@ -51,6 +51,7 @@ class EntryController {
     public function action_addEntry() {
         // if user clicked the button (GET request) display add entry form
         if ($_SERVER["REQUEST_METHOD"] === "GET") {
+            App::getSmarty()->assign("description", "Dodaj wpis");
             $this->renderTemplate("addEntry.tpl");
         } else if ($_SERVER["REQUEST_METHOD"] === "POST") {
             // get request parameters
@@ -106,7 +107,7 @@ class EntryController {
             "min_lenght"=>36,
             "max_lenhht"=>36,
             "regexp"=>"/[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/",
-            "validator_message"=>"UUID musi składać się z 36 znaków i mieć format "
+            "validator_message"=>"UUID musi składać się z 36 znaków i mieć format xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
         ]);
 
         if ($v->isLastOK()) {
