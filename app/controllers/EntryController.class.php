@@ -8,6 +8,10 @@ use core\ParamUtils;
 use core\SessionUtils;
 use core\Validator;
 
+// TODO: dates providec cannot be the same
+//       fromDate have to be earlier date than toDate
+//       set minimal value of dates
+
 class EntryController {
 
     private $months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -16,7 +20,11 @@ class EntryController {
 
     private $place;
     private $fromDate;
+    private $fromHour;
+    private $fromMinute;
     private $toDate;
+    private $toHour;
+    private $toMinute;
     private $wasDriver;
     private $subAllowance;
     private $dayOff;
@@ -48,15 +56,33 @@ class EntryController {
             $this->wasDriver = ParamUtils::getFromPost("driver") == "true";
             $this->subAllowance = ParamUtils::getFromPost("subsistence_allowance") == "true";
             $this->dayOff = ParamUtils::getFromPost("day_off") == "true";
+            $this->fromHour = intval(ParamUtils::getFromPost("time_from_hour"));
+            $this->fromMinute = intval(ParamUtils::getFromPost("time_from_minute"));
+            $this->toHour = intval(ParamUtils::getFromPost("time_to_hour"));
+            $this->toMinute = intval(ParamUtils::getFromPost("time_to_minute"));
 
             // validate parameters
-            $validationResult = $this->validateEntryData($this->place, $this->fromDate, $this->toDate, $this->dayOff);
+            $validationResult = $this->validateEntryData(
+                $this->place,
+                $this->fromDate,
+                $this->fromHour,
+                $this->fromMinute,
+                $this->toDate,
+                $this->toHour,
+                $this->toMinute,
+                $this->dayOff
+                );
 
             if ($validationResult) {
                 if ($this->dayOff) {
                     $this->addDayOffEntry($this->fromDate);
                 } else {
-                    $this->addEntry($this->place, $this->fromDate, $this->toDate, $this->wasDriver,
+
+                    $fromTime = $this->formatDateAndTime($this->fromDate, $this->fromHour, $this->fromMinute);
+                    $toTime = $this->formatDateAndTime($this->toDate, $this->toHour, $this->toMinute);
+                    $hours = $this->countHoursDifference($fromTime, $toTime);
+
+                    $this->addEntry($this->place, $fromTime, $toTime, $hours, $this->wasDriver,
                         $this->subAllowance, 0);
                 }
             }
@@ -85,16 +111,18 @@ class EntryController {
                 "ORDER"=>"from_date"
             ]);
         } else {
-            $entries = App::getDB()->select("work_hour_entry", "*");
+            $entries = App::getDB()->select("work_hour_entry", "*", [
+                "user_uuid"=>SessionUtils::load("userUuid", true)
+            ]);
         }
         return $entries;
     }
 
-    private function addEntry($place, $fromDate, $toDate, $wasDriver, $subAllowance, $dayOff) {
+    private function addEntry($place, $fromDate, $toDate, $hours, $wasDriver, $subAllowance, $dayOff) {
         $year = date("Y", strtotime($fromDate));
         $monthIdx = intval(date("m", strtotime($fromDate)));
         $month = $this->months[$monthIdx - 1];
-        if ($this->checkAnotherEntryForSameDay($fromDate, $year, $month)){
+        if ($this->checkAnotherEntryForSameDay($fromDate)){
             App::getMessages()->addMessage(new Message("Wpis dla dnia " . $fromDate . " już istnieje. 
             Aby wprowadzić nowy wpis dla danego dnia edytuj istniejący, lub usuń go i dodaj nowy.", Message::INFO));
         } else {
@@ -103,7 +131,7 @@ class EntryController {
                 "from_date"=> $fromDate,
                 "to_date"=> $toDate,
                 // TODO count from hours
-                "hours"=> 8,
+                "hours"=> $hours,
                 "place"=>$place,
                 "was_driver"=>$wasDriver ? 1 : 0,
                 "subsistence_allowance"=>$subAllowance ? 1 : 0,
@@ -120,7 +148,7 @@ class EntryController {
         $this->addEntry(null, $fromDate, null, null, null, true);
     }
 
-    private function validateEntryData($place, $fromDate, $toDate, $dayOff) {
+    private function validateEntryData($place, $fromDate, $fromHour, $fromMinute, $toDate, $toHour, $toMinute, $dayOff) {
         $paramRequired = true;
         $v = new Validator();
         // if day is off validate date only, and return result
@@ -128,7 +156,6 @@ class EntryController {
             $paramRequired = false;
         }
 
-        // TODO make some more date validation (to prevent from entering input like 0000-00-00)
         $v->validate($fromDate, [
             "required"=>true,
             "required_message"=>'"Data od" jest wymagana przy wprowadzaniu dnia wolnego',
@@ -149,8 +176,7 @@ class EntryController {
             "validator_message"=>'Niepoprawny format "Data od" (wymagany: YYYY-mm-dd)'
         ]);
 
-        $v = new Validator();
-        $place = $v->validate($place, [
+        $v->validate($place, [
             "escape"=>true,
             "trim"=>true,
             "required"=>$paramRequired,
@@ -160,16 +186,63 @@ class EntryController {
             "validator_message"=>"Miejsce musi mieć od 3 do 90 znaków"
         ]);
 
+        $v->validate($fromHour, [
+           "required"=>$paramRequired,
+           "required_message"=>'"Godzina od" jest wymagana przy wprowadzaniu dnia pracującego',
+           "int"=>true,
+           "min"=> 00,
+           "max"=>23,
+           "validator_message"=>'"Godzina od" musi być w zakresie od 00 do 23'
+        ]);
+
+        $v->validate($toHour, [
+            "required"=>$paramRequired,
+            "required_message"=>'"Godzina do" jest wymagana przy wprowadzaniu dnia pracującego',
+            "int"=>true,
+            "min"=> 00,
+            "max"=>23,
+            "validator_message"=>'"Godzina do" musi być w zakresie od 00 do 23'
+        ]);
+
+        $v->validate($fromMinute, [
+            "required"=>$paramRequired,
+            "required_message"=>'"Minuta od" jest wymagana przy wprowadzaniu dnia pracującego',
+            "int"=>true,
+            "min"=> 0,
+            "max"=>59,
+            "validator_message"=>'"Minuta od" musi być w zakresie od 00 do 59'
+        ]);
+
+        $v->validate($toMinute, [
+            "required"=>$paramRequired,
+            "required_message"=>'"Minuta do" jest wymagana przy wprowadzaniu dnia pracującego',
+            "int"=>true,
+            "min"=> 0,
+            "max"=>59,
+            "validator_message"=>'"Minuta do" musi być w zakresie od 00 do 59'
+        ]);
+
         return !App::getMessages()->isError();
     }
 
-    private function checkAnotherEntryForSameDay($fromDate, $year, $month) {
+    private function checkAnotherEntryForSameDay($fromDate) {
+        $date = date("Y-m-d",strtotime($fromDate));
         return App::getDB()->count("work_hour_entry", [
-            "from_date"=>$fromDate,
-            "year"=>$year,
-            "month"=>$month,
+            "from_date[~]"=>$date . "%",
             "user_uuid"=>SessionUtils::load("userUuid", true)
         ]);
+    }
+
+    private function formatDateAndTime($date, $hours, $minutes) {
+        $dateWithTime = "$date $hours:$minutes";
+        return date("Y-m-d H:i:s", strtotime($dateWithTime));
+    }
+
+    private function countHoursDifference($fromTime, $toTime) {
+        $from = strtotime($fromTime);
+        $to = strtotime($toTime);
+        // subtract dates and divide by 3600 to get difference in hours
+        return ($to - $from) / 3600;
     }
 
     private function renderTemplate($template) {
