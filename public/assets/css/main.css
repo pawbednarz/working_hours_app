@@ -2311,3 +2311,15 @@ button,
     text-transform: uppercase;
     letter-spacing: 0.05em;
   }
+
+  .delete-entry-button-form {
+    display: inline;
+    margin: 0 0;
+  }
+
+  .entry-button {
+    padding: 0;
+    box-shadow: none;
+    height: 1em;
+    font-size: 1em;
+  }

@@ -24,7 +24,10 @@
             <td>{($entry["day_off"]) ? "Tak" : "Nie"}</td>
             <td class="table-buttons">
                 <a href="#" class="fas fa-edit"><span class="label"></span></a>
-                <a href="#" class="far fa-trash-alt"><span class="label"></span></a>
+                <form class="delete-entry-button-form" method="post" action="{$conf->action_root}deleteEntry">
+                    <input type="hidden" value="{$entry["uuid"]}" name="entry_uuid">
+                    <button class="far fa-trash-alt entry-button"><span class="label"></span></button>
+                </form>
             </td>
         </tr>
         {/foreach}

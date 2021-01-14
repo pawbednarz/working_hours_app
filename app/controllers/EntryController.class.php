@@ -95,7 +95,25 @@ class EntryController {
     }
 
     public function action_deleteEntry() {
+        $v = new Validator();
+        $entryUuid = $v->validateFromPost("entry_uuid", [
+            "required"=>true,
+            "required_message"=>"Nie podano UUID wpisu do usunięcia",
+            "min_lenght"=>36,
+            "max_lenhht"=>36,
+            //TODO add regexp check
+            "validator_message"=>"UUID musi składać się z 36 znaków"
+        ]);
 
+        if ($v->isLastOK()) {
+            $result = $this->deleteEntry($entryUuid);
+            if ($result) {
+                App::getMessages(new Message("Pomyślnie usunięto wpis", Message::INFO));
+            } else {
+                App::getMessages(new Message("Nie udało się usunąć wpisu", Message::ERROR));
+            }
+        }
+        App::getSmarty()->display("dashboard.tpl");
     }
 
     private function getEntries($year=null, $month=null) {
@@ -146,6 +164,13 @@ class EntryController {
 
     private function addDayOffEntry($fromDate) {
         $this->addEntry(null, $fromDate, null, null, null, true);
+    }
+
+    private function deleteEntry($entryUuid) {
+        return App::getDB()->delete("work_hour_entry", [
+            "uuid"=>$entryUuid,
+            "user_uuid"=>SessionUtils::load("userUuid", true)
+        ]);
     }
 
     private function validateEntryData($place, $fromDate, $fromHour, $fromMinute, $toDate, $toHour, $toMinute, $dayOff) {

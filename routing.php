@@ -12,13 +12,13 @@ Utils::addRoute('addUser', 'UserController');
 Utils::addRoute('login', 'LoginController');
 Utils::addRoute('logout', 'LoginController');
 
-// user routes
+// entry routes
 Utils::addRoute('dashboard', 'EntryController', "user");
 Utils::addRoute('showEntries', 'EntryController', "user");
 Utils::addRoute('addEntry', 'EntryController', "user");
 //Utils::addRoute('editEntry', 'EntryController', "user");
-//Utils::addRoute('deleteEntry', 'EntryController', "user");
-//
+Utils::addRoute('deleteEntry', 'EntryController', "user");
+
 //// recepient routes
 //Utils::addRoute('showRecipients', 'RecipientController', "user");
 //Utils::addRoute('addRecipient', 'RecipientController', "user");
