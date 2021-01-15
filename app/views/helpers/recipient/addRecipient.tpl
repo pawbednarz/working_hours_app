@@ -4,7 +4,7 @@
     <div id="main">
         <div class="inner">
 
-            {include file="page_header.tpl"}
+            {include file="pageHeader.tpl"}
 
             {include file="recipientForm.tpl"}
 

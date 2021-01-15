@@ -7,7 +7,7 @@
         <div class="inner">
 
             <!-- Header -->
-            {include file="page_header.tpl"}
+            {include file="pageHeader.tpl"}
 
             <!-- Banner -->
             <section id="banner">
