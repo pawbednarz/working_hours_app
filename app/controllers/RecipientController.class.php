@@ -27,6 +27,7 @@ class RecipientController {
                 App::getMessages()->addMessage(new Message("Pomyślnie dodano odbiorcę", Message::INFO));
             }
         }
+        App::getSmarty()->assign("description", "Dodaj odbiorcę");
         $this->renderTemplate("addRecipient.tpl");
     }
 
@@ -53,6 +54,7 @@ class RecipientController {
                 App::getMessages()->addMessage(new Message("Nie udało się usunąć odbiorcy", Message::ERROR));
             }
         }
+        App::getSmarty()->assign("description", "Odbiorcy emaili");
         App::getSmarty()->assign("recipients", $this->getRecipients());
         $this->renderTemplate("recipientsDashboard.tpl");
     }
@@ -80,34 +82,34 @@ class RecipientController {
         ]);
     }
 
-    private function validateRecipientData($firstName, $lastName, $email) {
+    private function validateRecipientData(&$firstName, &$lastName, &$email) {
         $v = new Validator();
         $firstName = $v->validate($firstName, [
-            "required"=>true,
-            "required_message"=>'Parametr "Imię" jest wymagany',
-            "escape"=>true,
-            "trim"=>true,
+            "required"=>"true",
+            "required_message"=>'"Imię" jest wymagane',
+            "escape"=>"true",
+            "trim"=>"true",
             "min_length"=>2,
             "max_length"=>60,
             "validator_message"=>'"Imię" powinno zawierać od 2 do 60 znaków'
         ]);
 
         $lastName = $v->validate($lastName, [
-            "required"=>true,
-            "required_message"=>'Parametr "Nazwisko" jest wymagany',
-            "escape"=>true,
-            "trim"=>true,
+            "required"=>"true",
+            "required_message"=>'"Nazwisko" jest wymagane',
+            "escape"=>"true",
+            "trim"=>"true",
             "min_length"=>2,
             "max_length"=>80,
             "validator_message"=>'"Nazwisko" powinno zawierać od 2 do 80 znaków'
         ]);
 
         $email = $v->validate($email, [
-            "required"=>true,
-            "required_message"=>'Parametr "Email" jest wymagany',
-            "escape"=>true,
-            "email"=>true,
-            "trim"=>true,
+            "required"=>"true",
+            "required_message"=>'"Email" jest wymagany',
+            "escape"=>"true",
+            "email"=>"true",
+            "trim"=>"true",
             "min_length"=>5,
             "max_length"=>60,
             "validator_message"=>'"Email" powinno zawierać od 2 do 60 znaków'

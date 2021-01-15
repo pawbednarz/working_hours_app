@@ -37,9 +37,8 @@ class EntryController {
     }
 
     public function action_dashboard() {
-        // cast eng month to pl month
-        $currentMonthPl = $this->monthsPl[array_search($this->currentMonth, $this->months)];
-        App::getSmarty()->assign("description", "Godziny w bieżącym miesiącu ($currentMonthPl $this->currentYear)");
+        App::getSmarty()->assign("description", "Godziny w bieżącym miesiącu (" .
+            $this->getCurrentMonthPl() . " $this->currentYear)");
         App::getSmarty()->assign("entries", $this->getEntries($this->currentYear, $this->currentMonth));
         $this->renderTemplate("dashboard.tpl");
     }
@@ -49,11 +48,7 @@ class EntryController {
     }
 
     public function action_addEntry() {
-        // if user clicked the button (GET request) display add entry form
-        if ($_SERVER["REQUEST_METHOD"] === "GET") {
-            App::getSmarty()->assign("description", "Dodaj wpis");
-            $this->renderTemplate("addEntry.tpl");
-        } else if ($_SERVER["REQUEST_METHOD"] === "POST") {
+        if ($_SERVER["REQUEST_METHOD"] === "POST") {
             // get request parameters
             $this->place = ParamUtils::getFromPost("place");
             $this->fromDate = ParamUtils::getFromPost("date_from");
@@ -91,8 +86,9 @@ class EntryController {
                         $this->subAllowance, 0);
                 }
             }
-            $this->renderTemplate("addEntry.tpl");
         }
+        App::getSmarty()->assign("description", "Dodaj wpis");
+        $this->renderTemplate("addEntry.tpl");
     }
 
     public function action_editEntry() {
@@ -118,6 +114,8 @@ class EntryController {
                 App::getMessages()->addMessage(new Message("Nie udało się usunąć wpisu", Message::ERROR));
             }
         }
+        App::getSmarty()->assign("description", "Godziny w bieżącym miesiącu (" .
+            $this->getCurrentMonthPl() . " $this->currentYear)");
         App::getSmarty()->assign("entries", $this->getEntries($this->currentYear, $this->currentMonth));
         App::getSmarty()->display("dashboard.tpl");
     }
@@ -179,7 +177,7 @@ class EntryController {
         ]);
     }
 
-    private function validateEntryData($place, $fromDate, $fromHour, $fromMinute, $toDate, $toHour, $toMinute, $dayOff) {
+    private function validateEntryData(&$place, &$fromDate, &$fromHour, &$fromMinute, &$toDate, &$toHour, &$toMinute, &$dayOff) {
         $paramRequired = true;
         $v = new Validator();
         // if day is off validate date only, and return result
@@ -187,10 +185,15 @@ class EntryController {
             $paramRequired = false;
         }
 
+        // TODO assign $fromDate = $v->validate (same for toDate) and refactor function handling date operations
+        // to use DateTime class and OOP approach
+
+        // TODO fix problem when hour/minute is not passed, than it is validated correctly
+
         $v->validate($fromDate, [
-            "required"=>true,
+            "required"=>"true",
             "required_message"=>'"Data od" jest wymagana przy wprowadzaniu dnia wolnego',
-            "trim"=>true,
+            "trim"=>"true",
             "min_length"=>10,
             "max_length"=>10,
             "date_format"=>"Y-m-d",
@@ -200,16 +203,16 @@ class EntryController {
         $v->validate($toDate, [
             "required"=>$paramRequired,
             "required_message"=>'"Data do" jest wymagana przy wprowadzaniu dnia pracującego',
-            "trim"=>true,
+            "trim"=>"true",
             "min_length"=>10,
             "max_length"=>10,
             "date_format"=>"Y-m-d",
-            "validator_message"=>'Niepoprawny format "Data od" (wymagany: YYYY-mm-dd)'
+            "validator_message"=>'Niepoprawny format "Data do" (wymagany: YYYY-mm-dd)'
         ]);
 
-        $v->validate($place, [
-            "escape"=>true,
-            "trim"=>true,
+        $place = $v->validate($place, [
+            "escape"=>"true",
+            "trim"=>"true",
             "required"=>$paramRequired,
             "required_message"=>'Miejsce jest wymagane przy wprowadzaniu dnia pracującego',
             "min_length"=>3,
@@ -217,37 +220,37 @@ class EntryController {
             "validator_message"=>"Miejsce musi mieć od 3 do 90 znaków"
         ]);
 
-        $v->validate($fromHour, [
+        $fromHour = $v->validate($fromHour, [
            "required"=>$paramRequired,
            "required_message"=>'"Godzina od" jest wymagana przy wprowadzaniu dnia pracującego',
-           "int"=>true,
+           "int"=>"true",
            "min"=> 00,
            "max"=>23,
            "validator_message"=>'"Godzina od" musi być w zakresie od 00 do 23'
         ]);
 
-        $v->validate($toHour, [
+        $toHour = $v->validate($toHour, [
             "required"=>$paramRequired,
             "required_message"=>'"Godzina do" jest wymagana przy wprowadzaniu dnia pracującego',
-            "int"=>true,
+            "int"=>"true",
             "min"=> 00,
             "max"=>23,
             "validator_message"=>'"Godzina do" musi być w zakresie od 00 do 23'
         ]);
 
-        $v->validate($fromMinute, [
+        $fromMinute = $v->validate($fromMinute, [
             "required"=>$paramRequired,
             "required_message"=>'"Minuta od" jest wymagana przy wprowadzaniu dnia pracującego',
-            "int"=>true,
+            "int"=>"true",
             "min"=> 0,
             "max"=>59,
             "validator_message"=>'"Minuta od" musi być w zakresie od 00 do 59'
         ]);
 
-        $v->validate($toMinute, [
+        $toMinute = $v->validate($toMinute, [
             "required"=>$paramRequired,
             "required_message"=>'"Minuta do" jest wymagana przy wprowadzaniu dnia pracującego',
-            "int"=>true,
+            "int"=>"true",
             "min"=> 0,
             "max"=>59,
             "validator_message"=>'"Minuta do" musi być w zakresie od 00 do 59'
@@ -274,6 +277,10 @@ class EntryController {
         $to = strtotime($toTime);
         // subtract dates and divide by 3600 to get difference in hours
         return ($to - $from) / 3600;
+    }
+
+    private function getCurrentMonthPl() {
+        return $this->monthsPl[array_search($this->currentMonth, $this->months)];
     }
 
     private function renderTemplate($template) {
