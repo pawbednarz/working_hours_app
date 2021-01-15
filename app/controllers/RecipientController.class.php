@@ -17,15 +17,16 @@ class RecipientController {
     }
 
     public function action_addRecipient() {
-        $firstName = ParamUtils::getFromPost("first_name");
-        $lastName = ParamUtils::getFromPost("last_name");
-        $email = ParamUtils::getFromPost("email");
+        if ($_SERVER["REQUEST_METHOD"] === "POST") {
+            $firstName = ParamUtils::getFromPost("first_name");
+            $lastName = ParamUtils::getFromPost("last_name");
+            $email = ParamUtils::getFromPost("email");
 
-        if ($this->validateRecipientData($firstName, $lastName, $email)) {
-            $this->addRecipient($firstName, $lastName, $email);
-            App::getMessages()->addMessage(new Message("Pomyślnie dodano odbiorcę", Message::INFO));
+            if ($this->validateRecipientData($firstName, $lastName, $email)) {
+                $this->addRecipient($firstName, $lastName, $email);
+                App::getMessages()->addMessage(new Message("Pomyślnie dodano odbiorcę", Message::INFO));
+            }
         }
-
         $this->renderTemplate("addRecipient.tpl");
     }
 
