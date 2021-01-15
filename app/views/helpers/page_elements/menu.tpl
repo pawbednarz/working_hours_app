@@ -18,7 +18,7 @@
                     <span class="opener">Konfiguracja Email</span>
                     <ul>
                         <li><a href="{$conf->action_url}showRecipients">Odbiorcy</a></li>
-                        <li><a href="#">Szablony wiadomości</a></li>
+                        <li><a href="{$conf->action_url}showEmailTemplates">Szablony wiadomości</a></li>
                         <li><a href="#">Wysłane wiadomości</a></li>
                         <li><a href="#">Wyślij</a></li>
                     </ul>
