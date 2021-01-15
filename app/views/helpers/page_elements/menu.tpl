@@ -9,18 +9,18 @@
                 <li>
                     <span class="opener">Godziny</span>
                     <ul>
-                        <li><a href="#">Bieżący miesiąc</a></li>
-                        <li><a href="#">Poprzednie miesiące</a></li>
+                        <li><a href="{$conf->action_root}dashboard">Bieżący miesiąc</a></li>
+{*                        <li><a href="#">Poprzednie miesiące</a></li>*}
                     </ul>
                 </li>
-                <li><a href="#">Raporty</a></li>
+{*                <li><a href="#">Raporty</a></li>*}
                 <li>
                     <span class="opener">Konfiguracja Email</span>
                     <ul>
                         <li><a href="{$conf->action_url}showRecipients">Odbiorcy</a></li>
                         <li><a href="{$conf->action_url}showEmailTemplates">Szablony wiadomości</a></li>
-                        <li><a href="#">Wysłane wiadomości</a></li>
-                        <li><a href="#">Wyślij</a></li>
+{*                        <li><a href="#">Wysłane wiadomości</a></li>*}
+{*                        <li><a href="#">Wyślij</a></li>*}
                     </ul>
                 </li>
                 <li><a href="{$conf->action_root}logout">Wyloguj</a></li>
