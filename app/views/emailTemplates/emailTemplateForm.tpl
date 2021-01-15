@@ -1,13 +1,13 @@
-<form method="post" action="{$conf->action_url}addRecipient" class="padding-top-1-5 margin-bottom-1">
+<form method="post" action="{$conf->action_url}{$action}" class="padding-top-1-5 margin-bottom-1">
     <div class="row gtr-uniform">
-        <div class="col-4 col-12-xsmall">
-            <input type="text" name="first_name" id="first_name" placeholder="Imię">
+        <div class="col-6 col-12-xsmall">
+            <input type="text" name="template_name" id="template_name" placeholder="Nazwa szablonu">
         </div>
-        <div class="col-4 col-12-xsmall">
-            <input type="text" name="last_name" id="last_name" placeholder="Nazwisko">
+        <div class="col-6 col-12-xsmall">
+            <input type="text" name="template_subject" id="template_subject" placeholder="Temat">
         </div>
-        <div class="col-4 col-12-xsmall">
-            <input type="email" name="email" id="email" placeholder="Email">
+        <div class="col-12 ">
+            <textarea name="template_text" id="template_text" placeholder="Treść wiadomości" rows="10"></textarea>
         </div>
         <div class="col-2 col-12-medium">
             <button type="submit" class="primary fit">Dodaj</button>
@@ -16,6 +16,6 @@
 </form>
 <div class="row">
     <div class="col-2 col-12-medium">
-        <a class="button fit" href="{$conf->action_url}showRecipients">Powrót</a>
+        <a class="button fit" href="{$conf->action_url}showEmailTemplates">Powrót</a>
     </div>
 </div>
