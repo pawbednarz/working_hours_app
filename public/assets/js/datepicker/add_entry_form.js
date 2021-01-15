@@ -18,7 +18,6 @@ checkboxes.forEach((checkbox) => {
     })
 })
 
-// TODO make form fields disabled, when user checks day_off checkbox
 const dayOff = checkboxes[2];
 
 dayOff.addEventListener("change", () => {
