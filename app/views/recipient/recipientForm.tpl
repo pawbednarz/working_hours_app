@@ -1,4 +1,4 @@
-<form method="post" action="{$conf->action_url}addRecipient" class="padding-top-1-5 margin-bottom-1">
+<form method="post" action="{$conf->action_url}{$action}" class="padding-top-1-5 margin-bottom-1">
     <div class="row gtr-uniform">
         <div class="col-4 col-12-xsmall">
             <input type="text" name="first_name" id="first_name" placeholder="Imię">
