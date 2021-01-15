@@ -132,7 +132,9 @@ class App {
                 'one' => self::$config->root_path . '/app/views',
                 'two' => self::$config->root_path . '/app/views/helpers',
                 'three' => self::$config->root_path . '/app/views/helpers/messages',
-                'four' => self::$config->root_path . '/app/views/helpers/page_elements'
+                'four' => self::$config->root_path . '/app/views/helpers/page_elements',
+                'five' => self::$config->root_path . '/app/views/helpers/entry',
+                'six' => self::$config->root_path . '/app/views/helpers/recipient'
             ));
             if (file_exists(self::$config->root_path . '/app/onload_smarty.php')) {
                 require_once self::$config->root_path . '/app/onload_smarty.php';
