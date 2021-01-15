@@ -6,7 +6,7 @@
 
             {include file="pageHeader.tpl"}
 
-            {include file="entry_form.tpl"}
+            {include file="entryForm.tpl"}
 
             {include file="messages.tpl"}
         </div>

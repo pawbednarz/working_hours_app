@@ -2323,3 +2323,8 @@ button,
     height: 1em;
     font-size: 1em;
   }
+
+  .margin-bottom-1 {
+    margin: 0 0 1em 0;
+  }
+
