@@ -2,6 +2,7 @@
     <table>
         <thead>
         <tr>
+            <th>Dzień</ht>
             <th>Miejsce</th>
             <th>Od</th>
             <th>Do</th>
@@ -15,6 +16,7 @@
         <tbody>
         {foreach $entries as $entry}
         <tr>
+            <td>{($entry["from_date"] == $entry["to_date"]) ? $entry["from_date"] : "NULL XD"}</td>
             <td>{($entry["place"]) ? $entry["place"] : "---"}</td>
             <td>{$entry["from_date"]}</td>
             <td>{($entry["to_date"]) ? $entry["to_date"] : "---"}</td>

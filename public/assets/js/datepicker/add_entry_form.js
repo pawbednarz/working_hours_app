@@ -7,8 +7,39 @@ const dateToHour = document.querySelector("#time_to_hour");
 const dateToMinute = document.querySelector("#time_to_minute");
 
 
-const datepicker_from = new Datepicker(dateFrom);
-const datepicker_to = new Datepicker(dateTo)
+const datepickerOptions = {
+    "autohide": true,
+    "disableTouchKeyboard": true,
+    "todayHighlight": true,
+    "todayBtn": true,
+    "prevArrow": "<<<",
+    "nextArrow": ">>>",
+    "minDate": new Date(2015, 0),
+    "maxDate": new Date(2100, 12),
+    "weekStart": 1,
+    "daysOfWeekHighlighted": [1,2,3,4,5]
+}
+const datepickerFrom = new Datepicker(dateFrom);
+datepickerFrom.setOptions(datepickerOptions);
+
+dateFrom.addEventListener("changeDate", function() {
+    datepickerTo.setDate(datepickerFrom.getDate());
+})
+
+const datepickerTo = new Datepicker(dateTo)
+datepickerTo.setOptions({
+    "autohide": true,
+    "disableTouchKeyboard": true
+});
+
+let today = new Date().toISOString().slice(0, 10)
+
+datepickerFrom.setDate(today);
+datepickerTo.setDate(today);
+
+datepickerFrom.update(() => {
+    datepickerTo.setDate("2020-01-01");
+})
 
 const checkboxes = document.querySelectorAll("input[type=checkbox");
 
