@@ -17,7 +17,7 @@
                             <h2>Zaloguj się</h2>
                         </div>
                     </header>
-                    <form method="POST" action="http://192.168.0.108/working_hours_app/public/?action=login">
+                    <form method="POST" action="{$conf->action_url}login">
                         <div class="row gtr-uniform">
                             <div class="col-4 col-2-large"></div>
                             <div class="col-4 col-12-small col-8-large">
