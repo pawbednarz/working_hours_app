@@ -76,10 +76,11 @@ class RecipientController {
     }
 
     private function deleteRecipient($recipientUuid) {
-        return App::getDB()->delete("recipient", [
+        $data = App::getDB()->delete("recipient", [
             "uuid"=>$recipientUuid,
             "user_uuid"=>SessionUtils::load("userUuid", true)
         ]);
+        return $data->rowCount();
     }
 
     private function validateRecipientData(&$firstName, &$lastName, &$email) {

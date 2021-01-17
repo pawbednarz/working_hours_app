@@ -77,10 +77,11 @@ class EmailTemplateController {
     }
 
     private function deleteTemplate($templateUuid) {
-        return App::getDB()->delete("email_template", [
+        $data = App::getDB()->delete("email_template", [
             "uuid"=>$templateUuid,
             "user_uuid"=>SessionUtils::load("userUuid", true)
         ]);
+        return $data->rowCount();
     }
 
     private function validateEmailTemplateData(&$templateName, &$templateSubject, &$templateText) {
