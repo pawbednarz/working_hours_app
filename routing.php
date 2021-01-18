@@ -13,7 +13,7 @@ Utils::addRoute('login', 'LoginController');
 Utils::addRoute('logout', 'LoginController');
 
 // entry routes
-Utils::addRoute('dashboard', 'EntryController', "user");
+Utils::addRoute('dashboard', 'EntryController', ["admin", "user"]);
 Utils::addRoute('showEntries', 'EntryController', "user");
 Utils::addRoute('addEntry', 'EntryController', "user");
 //Utils::addRoute('editEntry', 'EntryController', "user");
@@ -44,10 +44,10 @@ Utils::addRoute('deleteEmailTemplate', 'EmailTemplateController', "user");
 //Utils::addRoute('showEmail', 'EmailSendController', "user");
 //Utils::addRoute('deleteEmail', 'EmailSendController', "user");
 //
-//// administrative routes
-//Utils::addRoute('adminDashboard', 'AdminController', "admin");
+// administrative routes
+Utils::addRoute('adminDashboard', 'AdminController', "admin");
 //
-//// user routes (only for administrator)
+// user routes (only for administrator)
 //Utils::addRoute('addUser', 'UserController', "admin");
 //Utils::addRoute('editUser', 'UserController', "admin");
 //Utils::addRoute('deleteUser', 'UserController', "admin");
