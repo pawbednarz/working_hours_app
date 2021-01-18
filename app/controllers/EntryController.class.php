@@ -5,10 +5,11 @@ namespace app\controllers;
 use core\App;
 use core\Message;
 use core\ParamUtils;
+use core\RoleUtils;
 use core\SessionUtils;
 use core\Validator;
 
-// TODO: dates providec cannot be the same
+// TODO: dates provided cannot be the same
 //       fromDate have to be earlier date than toDate
 //       set minimal value of dates
 
@@ -37,6 +38,9 @@ class EntryController {
     }
 
     public function action_dashboard() {
+        if (RoleUtils::inRole("admin")) {
+            App::getRouter()->redirectTo("adminDashboard");
+        }
         App::getSmarty()->assign("description", "Godziny w bieżącym miesiącu (" .
             $this->getCurrentMonthPl() . " $this->currentYear)");
         App::getSmarty()->assign("entries", $this->getEntries($this->currentYear, $this->currentMonth));
@@ -100,8 +104,8 @@ class EntryController {
         $entryUuid = $v->validateFromPost("entry_uuid", [
             "required"=>true,
             "required_message"=>"Nie podano UUID wpisu do usunięcia",
-            "min_lenght"=>36,
-            "max_lenhht"=>36,
+            "min_length"=>36,
+            "max_length"=>36,
             "regexp"=>"/[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/",
             "validator_message"=>"UUID musi składać się z 36 znaków i mieć format xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
         ]);
@@ -171,10 +175,11 @@ class EntryController {
     }
 
     private function deleteEntry($entryUuid) {
-        return App::getDB()->delete("work_hour_entry", [
+        $data = App::getDB()->delete("work_hour_entry", [
             "uuid"=>$entryUuid,
             "user_uuid"=>SessionUtils::load("userUuid", true)
         ]);
+        return $data->rowCount();
     }
 
     private function validateEntryData(&$place, &$fromDate, &$fromHour, &$fromMinute, &$toDate, &$toHour, &$toMinute, &$dayOff) {
