@@ -2,10 +2,9 @@
     <table>
         <thead>
         <tr>
-            <th>Dzień</ht>
+            <th>Dzień</th>
             <th>Miejsce</th>
-            <th>Od</th>
-            <th>Do</th>
+            <th>Od - Do</th>
             <th>Godziny</th>
             <th>Kierowca</th>
             <th>Dieta</th>
@@ -16,10 +15,25 @@
         <tbody>
         {foreach $entries as $entry}
         <tr>
-            <td>{($entry["from_date"] == $entry["to_date"]) ? $entry["from_date"] : "NULL XD"}</td>
+            <td>
+                {$entry["from_date"]|substr:8:2}
+{*                {if $entry["from_date"]|substr:0:10 === $entry["to_date"]|substr:0:10 or $entry["to_date"] == ""}*}
+{*                    {$entry["from_date"]|substr:0:10}*}
+{*                {elseif $entry["to_date"] != ""}*}
+{*                    {$entry["from_date"]|substr:0:10}<br>({$entry["to_date"]|substr:0:10})*}
+{*                {/if}*}
+            </td>
             <td>{($entry["place"]) ? $entry["place"] : "---"}</td>
-            <td>{$entry["from_date"]}</td>
-            <td>{($entry["to_date"]) ? $entry["to_date"] : "---"}</td>
+            <td>
+                {if !$entry["day_off"]}
+                    {$entry["from_date"]|substr:11:5} - {$entry["to_date"]|substr:11:5}
+                    {if $entry["from_date"]|substr:0:10 lt $entry["to_date"]|substr:0:10}
+                        ({$entry["to_date"]|substr:5:5})
+                    {/if}
+                {else}
+                    ---
+                {/if}
+            </td>
             <td>{($entry["hours"]) ? $entry["hours"] : "---"}</td>
             <td>{($entry["was_driver"]) ? "Tak" : "Nie"}</td>
             <td>{($entry["subsistence_allowance"]) ? "Tak" : "Nie"}</td>
@@ -33,6 +47,21 @@
             </td>
         </tr>
         {/foreach}
+        <tr>
+                <td></td>
+                <td></td>
+                <td class="align-right">SUMA:</td>
+                <td>
+                    {assign var="result" value="0"}
+                    {foreach $entries as $entry}
+                        {assign var="result" value=$result+$entry["hours"]}
+                    {/foreach}
+                    {$result}
+                </td>
+                <td></td>
+                <td></td>
+                <td></td>
+        </tr>
     </table>
     <a href="{$conf->action_root}addEntry" class="button">Dodaj wpis</a>
 </div>
