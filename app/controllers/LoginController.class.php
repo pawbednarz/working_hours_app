@@ -111,7 +111,6 @@ class LoginController {
             // echo $e
             App::getMessages()->addMessage("Wystąpił błąd podczas logowania użytkownika. Spróbuj ponownie, lub skontaktuj się z administratorem systemu");
         }
-        session_start();
         RoleUtils::addRole($data["role"]);
         SessionUtils::store("userUuid", $data["uuid"]);
         // create userData object to store data of user in there
