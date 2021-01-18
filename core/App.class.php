@@ -135,7 +135,8 @@ class App {
                 'four' => self::$config->root_path . '/app/views/helpers/page_elements',
                 'five' => self::$config->root_path . '/app/views/entry',
                 'six' => self::$config->root_path . '/app/views/recipient',
-                'seven' => self::$config->root_path . '/app/views/emailTemplates'
+                'seven' => self::$config->root_path . '/app/views/emailTemplates',
+                'eight' => self::$config->root_path . '/app/views/admin'
             ));
             if (file_exists(self::$config->root_path . '/app/onload_smarty.php')) {
                 require_once self::$config->root_path . '/app/onload_smarty.php';
