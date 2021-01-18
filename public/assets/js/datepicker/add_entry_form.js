@@ -24,6 +24,7 @@ datepickerFrom.setOptions(datepickerOptions);
 
 dateFrom.addEventListener("changeDate", function() {
     datepickerTo.setDate(datepickerFrom.getDate());
+    dateFromHour.focus();
 })
 
 const datepickerTo = new Datepicker(dateTo)
@@ -32,14 +33,14 @@ datepickerTo.setOptions({
     "disableTouchKeyboard": true
 });
 
+dateTo.addEventListener("changeDate", function() {
+    dateToHour.focus();
+})
+
 let today = new Date().toISOString().slice(0, 10)
 
 datepickerFrom.setDate(today);
 datepickerTo.setDate(today);
-
-datepickerFrom.update(() => {
-    datepickerTo.setDate("2020-01-01");
-})
 
 const checkboxes = document.querySelectorAll("input[type=checkbox");
 
@@ -83,4 +84,25 @@ function enableFormFields() {
     checkboxes[0].removeAttribute("disabled");
     // subsistence allowance checkbox
     checkboxes[1].removeAttribute("disabled");
+}
+
+dateFromHour.oninput =  () => {
+    validateHour(dateFromHour);
+}
+
+dateToHour.oninput =  () => {
+    validateHour(dateToHour);
+}
+
+function validateHour(e) {
+    const first = [0,1,2];
+    const second = [24,25,26,27,28,29];
+    if (e.value.length > 2) e.value = e.value.slice(0, 2);
+    if (e.value.length === 1 && !first.includes(parseInt(e.value))) {
+        e.value = "";
+    }
+    if (e.value.length === 2 && parseInt(e.value.slice(0,1)) === 2 && second.includes(parseInt(e.value))) {
+        e.value = 2;
+    }
+
 }
