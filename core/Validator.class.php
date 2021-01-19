@@ -264,4 +264,15 @@ class Validator {
         return $this->_validate($_COOKIE, $param_name, $config);
     }
 
+    public function validateUuid($uuid) {
+        $this->validate($uuid, [
+            "required" => true,
+            "required_message" => "Nie podano UUID użytkownika do edycji",
+            "min_length" => 36,
+            "max_length" => 36,
+            "regexp" => "/[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/",
+            "validator_message" => "UUID musi składać się z 36 znaków i mieć format xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+        ]);
+        return $this->isLastOK();
+    }
 }
