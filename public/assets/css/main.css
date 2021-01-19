@@ -758,6 +758,8 @@ hr {
         align-items: flex-end; }
       .row > .imp-small {
         order: -1; }
+      .row > .col-0-small {
+        display:none;    }
       .row > .col-1-small {
         width: 8.33333%; }
       .row > .off-1-small {
@@ -2102,7 +2104,7 @@ button,
       padding-top: 5em; } }
   @media screen and (max-width: 736px) {
     #header {
-      padding-top: 6.5em; }
+      padding-top: 4em; }
       #header .logo {
         font-size: 1.25em;
         margin: 0; }
@@ -2328,3 +2330,6 @@ button,
     margin: 0 0 1em 0;
   }
 
+  .margin-top-1 {
+    margin-top: 1em;
+  }
