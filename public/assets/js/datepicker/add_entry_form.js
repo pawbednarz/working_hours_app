@@ -86,11 +86,11 @@ function enableFormFields() {
     checkboxes[1].removeAttribute("disabled");
 }
 
-dateFromHour.oninput =  () => {
+dateFromHour.oninput = () => {
     validateHour(dateFromHour);
 }
 
-dateToHour.oninput =  () => {
+dateToHour.oninput = () => {
     validateHour(dateToHour);
 }
 
