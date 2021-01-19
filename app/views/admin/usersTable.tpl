@@ -25,5 +25,14 @@
             </tr>
         {/foreach}
     </table>
-    <a href="{$conf->action_root}addUser" class="button">Dodaj użytkownika</a>
+    <div class="row">
+        <div class="col-2 col-12-medium">
+            <a href="{$conf->action_root}addUser" class="button primary fit">Dodaj użytkownika</a>
+        </div>
+        <div class="col-10"></div>
+        <div class="col-2 col-12-medium">
+            <a class="button fit margin-top-1" href="{$conf->action_url}logout">Wyloguj</a>
+        </div>
+        <div class="col-10"></div>
+    </div>
 </div>
