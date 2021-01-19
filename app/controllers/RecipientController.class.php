@@ -13,7 +13,7 @@ class RecipientController {
     public function action_showRecipients() {
         App::getSmarty()->assign("description", "Odbiorcy emaili");
         App::getSmarty()->assign("recipients", $this->getRecipients());
-        $this->renderTemplate("recipientsDashboard.tpl");
+        $this->renderTemplate("recipientsTable.tpl");
     }
 
     public function action_addRecipient() {
@@ -28,7 +28,7 @@ class RecipientController {
             }
         }
         App::getSmarty()->assign("description", "Dodaj odbiorcę");
-        $this->renderTemplate("addRecipient.tpl");
+        $this->renderTemplate("recipientForm.tpl");
     }
 
     public function action_editRecipient() {
@@ -56,7 +56,7 @@ class RecipientController {
         }
         App::getSmarty()->assign("description", "Odbiorcy emaili");
         App::getSmarty()->assign("recipients", $this->getRecipients());
-        $this->renderTemplate("recipientsDashboard.tpl");
+        $this->renderTemplate("recipientsTable.tpl");
     }
 
     private function getRecipients() {

@@ -15,7 +15,7 @@ class EmailTemplateController {
     public function action_showEmailTemplates() {
         App::getSmarty()->assign("description", "Szablony wiadomości email");
         App::getSmarty()->assign("templates", $this->getTemplates());
-        $this->renderTemplate("emailTemplateDashboard.tpl");
+        $this->renderTemplate("emailTemplatesTable.tpl");
     }
 
     public function action_addEmailTemplate() {
@@ -29,7 +29,7 @@ class EmailTemplateController {
             }
         }
         App::getSmarty()->assign("description", "Dodaj szablon");
-        $this->renderTemplate("addEmailTemplate.tpl");
+        $this->renderTemplate("emailTemplateForm.tpl");
     }
 
     public function action_editEmailTemplate() {
@@ -57,7 +57,7 @@ class EmailTemplateController {
         }
         App::getSmarty()->assign("description", "Szablony wiadomości email");
         App::getSmarty()->assign("templates", $this->getTemplates());
-        $this->renderTemplate("emailTemplateDashboard.tpl");
+        $this->renderTemplate("emailTemplatesTable.tpl");
     }
 
     private function getTemplates() {

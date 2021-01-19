@@ -44,7 +44,7 @@ class EntryController {
         App::getSmarty()->assign("description", "Godziny w bieżącym miesiącu (" .
             $this->getCurrentMonthPl() . " $this->currentYear)");
         App::getSmarty()->assign("entries", $this->getEntries($this->currentYear, $this->currentMonth));
-        $this->renderTemplate("dashboard.tpl");
+        $this->renderTemplate("entriesTable.tpl");
     }
 
     public function action_showEntries() {
@@ -92,7 +92,7 @@ class EntryController {
             }
         }
         App::getSmarty()->assign("description", "Dodaj wpis");
-        $this->renderTemplate("addEntry.tpl");
+        $this->renderTemplate("entryForm.tpl");
     }
 
     public function action_editEntry() {
