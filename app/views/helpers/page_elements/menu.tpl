@@ -5,11 +5,11 @@
                 <h2>Menu</h2>
             </header>
             <ul>
-                <li><a href="{$conf->action_root}dashboard">Strona główna</a></li>
+                <li><a href="{$conf->action_url}dashboard">Strona główna</a></li>
                 <li>
                     <span class="opener">Godziny</span>
                     <ul>
-                        <li><a href="{$conf->action_root}dashboard">Bieżący miesiąc</a></li>
+                        <li><a href="{$conf->action_url}dashboard">Bieżący miesiąc</a></li>
 {*                        <li><a href="#">Poprzednie miesiące</a></li>*}
                     </ul>
                 </li>
@@ -23,7 +23,7 @@
 {*                        <li><a href="#">Wyślij</a></li>*}
                     </ul>
                 </li>
-                <li><a href="{$conf->action_root}logout">Wyloguj</a></li>
+                <li><a href="{$conf->action_url}logout">Wyloguj</a></li>
             </ul>
         </nav>
     </div>

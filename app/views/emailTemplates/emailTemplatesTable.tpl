@@ -12,7 +12,7 @@
                 <td>{$template["name"]}</td>
                 <td class="table-buttons">
                     <a href="#" class="fas fa-edit"><span class="label"></span></a>
-                    <form class="delete-entry-button-form" method="post" action="{$conf->action_root}deleteEmailTemplate">
+                    <form class="delete-entry-button-form" method="post" action="{$conf->action_url}deleteEmailTemplate">
                         <input type="hidden" value="{$template["uuid"]}" name="email_template_uuid">
                         <button class="far fa-trash-alt entry-button"><span class="label"></span></button>
                     </form>
@@ -20,5 +20,5 @@
             </tr>
         {/foreach}
     </table>
-    <a href="{$conf->action_root}addEmailTemplate" class="button">Dodaj szablon</a>
+    <a href="{$conf->action_url}addEmailTemplate" class="button">Dodaj szablon</a>
 </div>

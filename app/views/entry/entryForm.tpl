@@ -18,10 +18,10 @@
                 <input class="datepicker" type="text" name="date_to" id="date_to" placeholder="Data do">
             </div>
             <div class="col-1 col-2-xlarge col-3-medium">
-                <input class="hour_picker" type="number" name="time_to_hour" id="time_to_hour" min="0" max="23" placeholder="G">
+                <input class="hour_picker" type="text" name="time_to_hour" id="time_to_hour" min="0" max="23" placeholder="G">
             </div>
             <div class="col-1 col-2-xlarge col-3-medium">
-                <input class="hour_picker" type="number" name="time_to_minute" id="time_to_minute" step="10" min="0" max="59" placeholder="M">
+                <input class="hour_picker" type="text" name="time_to_minute" id="time_to_minute" step="10" min="0" max="59" placeholder="M">
             </div>
         <div class="col-7 col-4-xlarge col-0-medium"></div>
         <div class="col-12 col-12-small">

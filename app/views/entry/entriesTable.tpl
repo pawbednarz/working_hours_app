@@ -40,7 +40,7 @@
             <td>{($entry["day_off"]) ? "Tak" : "Nie"}</td>
             <td class="table-buttons">
                 <a href="#" class="fas fa-edit"><span class="label"></span></a>
-                <form class="delete-entry-button-form" method="post" action="{$conf->action_root}deleteEntry">
+                <form class="delete-entry-button-form" method="post" action="{$conf->action_url}deleteEntry">
                     <input type="hidden" value="{$entry["uuid"]}" name="entry_uuid">
                     <button class="far fa-trash-alt entry-button"><span class="label"></span></button>
                 </form>
@@ -63,5 +63,5 @@
                 <td></td>
         </tr>
     </table>
-    <a href="{$conf->action_root}addEntry" class="button">Dodaj wpis</a>
+    <a href="{$conf->action_url}addEntry" class="button">Dodaj wpis</a>
 </div>

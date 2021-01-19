@@ -16,8 +16,8 @@
                 <td>{$user["email"]}</td>
                 <td>{$user["role"]}</td>
                 <td class="table-buttons">
-                    <a href="#" class="fas fa-edit"><span class="label"></span></a>
-                    <form class="delete-entry-button-form" method="post" action="{$conf->action_root}deleteUser">
+                    <a href="{$conf->action_url}editUser&uuid={$user["uuid"]}" class="fas fa-edit"><span class="label"></span></a>
+                    <form class="delete-entry-button-form" method="post" action="{$conf->action_url}deleteUser">
                         <input type="hidden" value="{$user["uuid"]}" name="user_uuid">
                         <button class="far fa-trash-alt entry-button"><span class="label"></span></button>
                     </form>
@@ -27,7 +27,7 @@
     </table>
     <div class="row">
         <div class="col-2 col-12-medium">
-            <a href="{$conf->action_root}addUser" class="button primary fit">Dodaj użytkownika</a>
+            <a href="{$conf->action_url}addUser" class="button primary fit">Dodaj użytkownika</a>
         </div>
         <div class="col-10"></div>
         <div class="col-2 col-12-medium">
