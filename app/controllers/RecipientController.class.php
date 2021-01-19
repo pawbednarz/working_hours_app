@@ -36,17 +36,10 @@ class RecipientController {
     }
 
     public function action_deleteRecipient() {
+        $recipientUuid = ParamUtils::getFromPost("recipient_uuid");
         $v = new Validator();
-        $recipientUuid = $v->validateFromPost("recipient_uuid", [
-            "required"=>true,
-            "required_message"=>"Nie podano UUID odbiorcy do usunięcia",
-            "min_lenght"=>36,
-            "max_lenhht"=>36,
-            "regexp"=>"/[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/",
-            "validator_message"=>"UUID musi składać się z 36 znaków i mieć format xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-        ]);
 
-        if ($v->isLastOK()) {
+        if ($v->validateUuid($recipientUuid)) {
             $result = $this->deleteRecipient($recipientUuid);
             if ($result) {
                 App::getMessages()->addMessage(new Message("Pomyślnie usunięto odbiorcę", Message::INFO));
@@ -54,9 +47,7 @@ class RecipientController {
                 App::getMessages()->addMessage(new Message("Nie udało się usunąć odbiorcy", Message::ERROR));
             }
         }
-        App::getSmarty()->assign("description", "Odbiorcy emaili");
-        App::getSmarty()->assign("recipients", $this->getRecipients());
-        $this->renderTemplate("recipientsTable.tpl");
+        App::getRouter()->forwardTo("showRecipients");
     }
 
     private function getRecipients() {
@@ -71,7 +62,7 @@ class RecipientController {
             "first_name"=>$firstName,
             "last_name"=>$lastName,
             "email"=>$email,
-            "user_uuid"=>SessionUtils::load("userUuid", load)
+            "user_uuid"=>SessionUtils::load("userUuid", true)
         ]);
     }
 

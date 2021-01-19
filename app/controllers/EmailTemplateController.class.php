@@ -37,17 +37,10 @@ class EmailTemplateController {
     }
 
     public function action_deleteEmailTemplate() {
+        $templateUuid = ParamUtils::getFromPost("email_template_uuid");
         $v = new Validator();
-        $templateUuid = $v->validateFromPost("email_template_uuid", [
-            "required"=>"true",
-            "required_message"=>"Nie podano UUID odbiorcy do usunięcia",
-            "min_lenght"=>36,
-            "max_lenhht"=>36,
-            "regexp"=>"/[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/",
-            "validator_message"=>"UUID musi składać się z 36 znaków i mieć format xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-        ]);
 
-        if ($v->isLastOK()) {
+        if ($v->validateUuid($templateUuid)) {
             $result = $this->deleteTemplate($templateUuid);
             if ($result) {
                 App::getMessages()->addMessage(new Message("Pomyślnie usunięto szablon", Message::INFO));
@@ -55,9 +48,7 @@ class EmailTemplateController {
                 App::getMessages()->addMessage(new Message("Nie udało się usunąć szablonu", Message::ERROR));
             }
         }
-        App::getSmarty()->assign("description", "Szablony wiadomości email");
-        App::getSmarty()->assign("templates", $this->getTemplates());
-        $this->renderTemplate("emailTemplatesTable.tpl");
+        App::getRouter()->forwardTo("showEmailTemplates");
     }
 
     private function getTemplates() {

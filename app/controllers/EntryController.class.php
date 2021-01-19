@@ -100,17 +100,10 @@ class EntryController {
     }
 
     public function action_deleteEntry() {
+        $entryUuid = ParamUtils::getFromPost("entry_uuid");
         $v = new Validator();
-        $entryUuid = $v->validateFromPost("entry_uuid", [
-            "required"=>true,
-            "required_message"=>"Nie podano UUID wpisu do usunięcia",
-            "min_length"=>36,
-            "max_length"=>36,
-            "regexp"=>"/[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/",
-            "validator_message"=>"UUID musi składać się z 36 znaków i mieć format xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-        ]);
 
-        if ($v->isLastOK()) {
+        if ($v->validateUuid($entryUuid)) {
             $result = $this->deleteEntry($entryUuid);
             if ($result) {
                 App::getMessages()->addMessage(new Message("Pomyślnie usunięto wpis", Message::INFO));
@@ -118,10 +111,7 @@ class EntryController {
                 App::getMessages()->addMessage(new Message("Nie udało się usunąć wpisu", Message::ERROR));
             }
         }
-        App::getSmarty()->assign("description", "Godziny w bieżącym miesiącu (" .
-            $this->getCurrentMonthPl() . " $this->currentYear)");
-        App::getSmarty()->assign("entries", $this->getEntries($this->currentYear, $this->currentMonth));
-        App::getSmarty()->display("dashboard.tpl");
+        App::getRouter()->forwardTo("dashboard");
     }
 
     private function getEntries($year=null, $month=null) {

@@ -39,17 +39,10 @@ class AdminController {
     }
 
     public function action_editUser() {
+        $userUuid = ParamUtils::getFromGet("uuid");
         $v = new Validator();
-        $userUuid = $v->validateFromGet("uuid", [
-            "required"=>true,
-            "required_message"=>"Nie podano UUID użytkownika do edycji",
-            "min_length"=>36,
-            "max_length"=>36,
-            "regexp"=>"/[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/",
-            "validator_message"=>"UUID musi składać się z 36 znaków i mieć format xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-        ]);
 
-        if ($v->isLastOK() && $_SERVER["REQUEST_METHOD"] === "POST") {
+        if ($v->validateUuid($userUuid) && $_SERVER["REQUEST_METHOD"] === "POST") {
             $firstName = ParamUtils::getFromPost("first_name");
             $lastName = ParamUtils::getFromPost("last_name");
             $email = ParamUtils::getFromPost("email");
