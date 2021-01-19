@@ -1,4 +1,4 @@
-{extends name="mainWithoutMenu.tpl"}
+{extends file="mainWithoutMenu.tpl"}
 {block name="content"}
     <section id="banner">
     <div class="content">
