@@ -25,6 +25,10 @@
             <div class="col-6 col-12-medium">
                 <input type="password" name="password_repeat" id="password_repeat" placeholder="Powtórz hasło">
             </div>
+            <div class="col-12">
+                <input type="checkbox" id="is_active" name="is_active" value="true">
+                <label for="is_active">Aktywny</label>
+            </div>
             <div class="col-6 col-12-medium">
                 <button type="submit" class="primary fit">Dodaj</button>
             </div>

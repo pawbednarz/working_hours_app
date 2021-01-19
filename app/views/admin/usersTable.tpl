@@ -8,6 +8,7 @@
             <th>Nazwisko</th>
             <th>Email</th>
             <th>Rola</th>
+            <th>Aktywny</th>
         </tr>
         </thead>
         <tbody>
@@ -17,12 +18,9 @@
                 <td>{$user["last_name"]}</td>
                 <td>{$user["email"]}</td>
                 <td>{$user["role"]}</td>
+                <td>{($user["is_active"]) ? "Tak" : "Nie"}</td>
                 <td class="table-buttons">
                     <a href="{$conf->action_url}editUser&uuid={$user["uuid"]}" class="fas fa-edit"><span class="label"></span></a>
-                    <form class="delete-entry-button-form" method="post" action="{$conf->action_url}deleteUser">
-                        <input type="hidden" value="{$user["uuid"]}" name="user_uuid">
-                        <button class="far fa-trash-alt entry-button"><span class="label"></span></button>
-                    </form>
                 </td>
             </tr>
         {/foreach}

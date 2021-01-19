@@ -1,6 +1,6 @@
 {extends file="mainWithoutMenu.tpl"}
 {block name="content"}
-<form method="post" action="{$conf->action_url}{$action}" class="padding-top-1-5 margin-bottom-1">
+<form method="post" action="{$conf->action_url}{$action}&uuid={$user["uuid"]}" class="padding-top-1-5 margin-bottom-1">
     <div class="row">
         <div class="col-3 col-0-small"></div>
         <div class="col-6 col-12-small row gtr-uniform">
@@ -19,14 +19,18 @@
                     <option value="admin" {if $action === "editUser" and $user["role"] === "admin"}selected{/if}>Administrator</option>
                 </select>
             </div>
-            <div class="col-6 col-12-medium">
-                <input type="password" name="password" id="password" placeholder="Hasło">
+            <div class="col-12">
+                <input type="checkbox" id="is_active" name="is_active" value="true" {if $user["is_active"]}checked{/if}>
+                <label for="is_active">Aktywny</label>
             </div>
+{*            <div class="col-6 col-12-medium">*}
+{*                <input type="password" name="password" id="password" placeholder="Hasło">*}
+{*            </div>*}
+{*            <div class="col-6 col-12-medium">*}
+{*                <input type="password" name="password_repeat" id="password_repeat" placeholder="Powtórz hasło">*}
+{*            </div>*}
             <div class="col-6 col-12-medium">
-                <input type="password" name="password_repeat" id="password_repeat" placeholder="Powtórz hasło">
-            </div>
-            <div class="col-6 col-12-medium">
-                <button type="submit" class="primary fit">Dodaj</button>
+                <button type="submit" class="primary fit">Edytuj</button>
             </div>
             <div class="col-6 col-12-medium">
                 <a class="button fit" href="{$conf->action_url}adminDashboard">Powrót</a>

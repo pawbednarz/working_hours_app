@@ -61,11 +61,13 @@ class LoginController {
         }
 
         $isPasswordCorrect = false;
+        $isActive = false;
         // try to get user from database by email
         try {
             $userData = App::getDB()->select("user", [
                 "email",
-                "password"
+                "password",
+                "is_active"
             ],[
                 "email"=>$email
             ]);
@@ -74,6 +76,7 @@ class LoginController {
             // else call pbkdf2
             if (count($userData) == 1) {
                     $isPasswordCorrect = $this->checkPassword($password, $userData[0]["password"]);
+                    $isActive = $userData[0]["is_active"];
             } else {
                 // call pbkdf2 function to prevent time-based user enumaration attacks attacks
                 hash_pbkdf2("sha512", "pass", "", 15000);
@@ -86,8 +89,14 @@ class LoginController {
         }
         if (!$isPasswordCorrect) {
             App::getMessages()->addMessage(new Message("Niepoprawny email lub hasło", Message::ERROR));
+            return false;
         }
-        return $isPasswordCorrect;
+
+        if (!$isActive) {
+            App::getMessages()->addMessage(new Message("Użytkownik jest nieaktywny. Skontaktuj się z administratorem", Message::INFO));
+            return false;
+        }
+        return true;
     }
 
     private function checkPassword($formPassword, $dbPassword) {
