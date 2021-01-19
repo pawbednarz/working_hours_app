@@ -47,5 +47,5 @@ Utils::addRoute('adminDashboard', 'AdminController', "admin");
 
 // user routes (only for administrator)
 Utils::addRoute('addUser', 'AdminController', "admin");
-//Utils::addRoute('editUser', 'AdminController', "admin");
+Utils::addRoute('editUser', 'AdminController', "admin");
 Utils::addRoute('deleteUser', 'AdminController', "admin");

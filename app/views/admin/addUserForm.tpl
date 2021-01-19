@@ -1,20 +1,22 @@
+{extends file="mainWithoutMenu.tpl"}
+{block name="content"}
 <form method="post" action="{$conf->action_url}{$action}" class="padding-top-1-5 margin-bottom-1">
     <div class="row">
         <div class="col-3 col-0-small"></div>
         <div class="col-6 col-12-small row gtr-uniform">
             <div class="col-6 col-12-medium">
-                <input type="text" name="first_name" id="first_name" placeholder="Imię" autocomplete="off">
+                <input type="text" name="first_name" id="first_name" placeholder="Imię" autocomplete="off" value="{if $action === "editUser"}{$user["first_name"]}{/if}">
             </div>
             <div class="col-6 col-12-medium">
-                <input type="text" name="last_name" id="last_name" placeholder="Nazwisko" autocomplete="off">
+                <input type="text" name="last_name" id="last_name" placeholder="Nazwisko" autocomplete="off" value="{if $action === "editUser"}{$user["last_name"]}{/if}">
             </div>
             <div class="col-6 col-12-medium">
-                <input type="email" name="email" id="email" placeholder="Email" autocomplete="off">
+                <input type="email" name="email" id="email" placeholder="Email" autocomplete="off" value="{if $action === "editUser"}{$user["email"]}{/if}">
             </div>
             <div class="col-6 col-12-medium">
                 <select name="role">
-                    <option value="user">Użytkownik</option>
-                    <option value="admin">Administrator</option>
+                    <option value="user" {if $action === "editUser" and $user["role"] === "user"}selected{/if}>Użytkownik</option>
+                    <option value="admin" {if $action === "editUser" and $user["role"] === "admin"}selected{/if}>Administrator</option>
                 </select>
             </div>
             <div class="col-6 col-12-medium">
@@ -33,4 +35,4 @@
         <div class="col-3 col-0-small"></div>
     </div>
 </form>
-
+{/block}

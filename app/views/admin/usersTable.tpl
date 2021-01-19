@@ -1,3 +1,5 @@
+{extends file="mainWithoutMenu.tpl"}
+{block name="content"}
 <div class="table-wrapper entries_table">
     <table>
         <thead>
@@ -36,3 +38,4 @@
         <div class="col-10"></div>
     </div>
 </div>
+{/block}

@@ -1,3 +1,5 @@
+{extends file="main.tpl"}
+{block name="content"}
 <div class="table-wrapper entries_table">
     <table>
         <thead>
@@ -65,3 +67,4 @@
     </table>
     <a href="{$conf->action_url}addEntry" class="button">Dodaj wpis</a>
 </div>
+{/block}

@@ -1,3 +1,5 @@
+{extends file="main.tpl"}
+{block name="content"}
 <form method="post" action="{$conf->action_url}{$action}" class="padding-top-1-5 margin-bottom-1">
     <div class="row gtr-uniform">
         <div class="col-6 col-12-xsmall">
@@ -19,3 +21,4 @@
         <a class="button fit" href="{$conf->action_url}showEmailTemplates">Powrót</a>
     </div>
 </div>
+{/block}
