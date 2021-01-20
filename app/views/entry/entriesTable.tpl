@@ -41,7 +41,7 @@
             <td>{($entry["subsistence_allowance"]) ? "Tak" : "Nie"}</td>
             <td>{($entry["day_off"]) ? "Tak" : "Nie"}</td>
             <td class="table-buttons">
-                <a href="#" class="fas fa-edit"><span class="label"></span></a>
+                <a href="{$conf->action_url}editEntry&entry_uuid={$entry["uuid"]}" class="fas fa-edit"><span class="label"></span></a>
                 <form class="delete-entry-button-form" method="post" action="{$conf->action_url}deleteEntry">
                     <input type="hidden" value="{$entry["uuid"]}" name="entry_uuid">
                     <button class="far fa-trash-alt entry-button"><span class="label"></span></button>
@@ -49,6 +49,7 @@
             </td>
         </tr>
         {/foreach}
+        {if !empty($entries)}
         <tr>
                 <td></td>
                 <td></td>
@@ -64,6 +65,7 @@
                 <td></td>
                 <td></td>
         </tr>
+        {/if}
     </table>
     <a href="{$conf->action_url}addEntry" class="button">Dodaj wpis</a>
 </div>

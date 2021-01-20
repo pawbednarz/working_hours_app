@@ -13,7 +13,7 @@
             <tr>
                 <td>{$template["name"]}</td>
                 <td class="table-buttons">
-                    <a href="#" class="fas fa-edit"><span class="label"></span></a>
+                    <a href="{$conf->action_url}editEmailTemplate&email_template_uuid={$template["uuid"]}" class="fas fa-edit"><span class="label"></span></a>
                     <form class="delete-entry-button-form" method="post" action="{$conf->action_url}deleteEmailTemplate">
                         <input type="hidden" value="{$template["uuid"]}" name="email_template_uuid">
                         <button class="far fa-trash-alt entry-button"><span class="label"></span></button>

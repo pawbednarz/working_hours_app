@@ -1,6 +1,6 @@
 {extends file="mainWithoutMenu.tpl"}
 {block name="content"}
-<form method="post" action="{$conf->action_url}{$action}&uuid={$user["uuid"]}" class="padding-top-1-5 margin-bottom-1">
+<form method="post" action="{$conf->action_url}{$action}&user_uuid={$user["uuid"]}" class="padding-top-1-5 margin-bottom-1">
     <div class="row">
         <div class="col-3 col-0-small"></div>
         <div class="col-6 col-12-small row gtr-uniform">
