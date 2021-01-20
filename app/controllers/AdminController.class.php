@@ -35,15 +35,12 @@ class AdminController {
         $this->renderAddUserForm();
     }
 
-    public function action_editUser()
-    {
-        $userUuid = ParamUtils::getFromGet("uuid");
+    public function action_editUser() {
+        $userUuid = ParamUtils::getFromGet("user_uuid");
         $v = new Validator();
 
         if ($v->validateUuid($userUuid) && $this->userExist($userUuid)) {
-            if ($_SERVER["REQUEST_METHOD"] === "GET") {
-                $this->renderUserEditForm($userUuid);
-            } else if ($_SERVER["REQUEST_METHOD"] === "POST") {
+            if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 $firstName = ParamUtils::getFromPost("first_name");
                 $lastName = ParamUtils::getFromPost("last_name");
                 $email = ParamUtils::getFromPost("email");
@@ -54,9 +51,9 @@ class AdminController {
                     $this->editUser($userUuid, $firstName, $lastName, $email, $role, $isActive);
                     App::getMessages()->addMessage(new Message("Pomyślnie edytowano użytkownika", Message::INFO));
                 }
-                $this->renderUserEditForm($userUuid);
-                exit();
             }
+            $this->renderUserEditForm($userUuid);
+            exit();
         }
         $this->renderUsersTable();
     }
@@ -66,7 +63,7 @@ class AdminController {
     }
 
     private function getUser($userUuid) {
-        return App::getDB()->select("user", [
+        $data = App::getDB()->select("user", [
             "uuid",
             "first_name",
             "last_name",
@@ -76,6 +73,7 @@ class AdminController {
         ], [
             "uuid"=>$userUuid
         ]);
+        return $data[0];
     }
 
     private function addUser($firstName, $lastName, $email, $password, $role, $isActive) {
@@ -194,7 +192,7 @@ class AdminController {
     }
 
     private function renderUserEditForm($userUuid) {
-        App::getSmarty()->assign("user", $this->getUser($userUuid)[0]);
+        App::getSmarty()->assign("user", $this->getUser($userUuid));
         App::getSmarty()->assign("description", "Edytuj użytkownika");
         App::getSmarty()->display("editUserForm.tpl");
     }
