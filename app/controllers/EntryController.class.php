@@ -41,10 +41,7 @@ class EntryController {
         if (RoleUtils::inRole("admin")) {
             App::getRouter()->redirectTo("adminDashboard");
         }
-        App::getSmarty()->assign("description", "Godziny w bieżącym miesiącu (" .
-            $this->getCurrentMonthPl() . " $this->currentYear)");
-        App::getSmarty()->assign("entries", $this->getEntries($this->currentYear, $this->currentMonth));
-        $this->renderTemplate("entriesTable.tpl");
+        $this->renderEntriesTable();
     }
 
     public function action_showEntries() {
@@ -91,12 +88,48 @@ class EntryController {
                 }
             }
         }
-        App::getSmarty()->assign("description", "Dodaj wpis");
-        $this->renderTemplate("entryForm.tpl");
+        $this->renderAddEntryForm();
     }
 
     public function action_editEntry() {
+        $entryUuid = ParamUtils::getFromGet("entry_uuid");
+        $v = new Validator();
 
+        if ($v->validateUuid($entryUuid) && $this->entryExist($entryUuid)) {
+            if ($_SERVER["REQUEST_METHOD"] === "POST") {
+                $place = ParamUtils::getFromPost("place");
+                $fromDate = ParamUtils::getFromPost("date_from");
+                $toDate = ParamUtils::getFromPost("date_to");
+                $wasDriver = ParamUtils::getFromPost("driver") == "true";
+                $subAllowance = ParamUtils::getFromPost("subsistence_allowance") == "true";
+                $dayOff = ParamUtils::getFromPost("day_off") == "true";
+                $fromHour = intval(ParamUtils::getFromPost("time_from_hour"));
+                $fromMinute = intval(ParamUtils::getFromPost("time_from_minute"));
+                $toHour = intval(ParamUtils::getFromPost("time_to_hour"));
+                $toMinute = intval(ParamUtils::getFromPost("time_to_minute"));
+                $validationResult = $this->validateEntryData(
+                    $place,
+                    $fromDate,
+                    $fromHour,
+                    $fromMinute,
+                    $toDate,
+                    $toHour,
+                    $toMinute,
+                    $dayOff
+                );
+                if ($validationResult) {
+                    $fromTime = $this->formatDateAndTime($this->fromDate, $this->fromHour, $this->fromMinute);
+                    $toTime = $this->formatDateAndTime($this->toDate, $this->toHour, $this->toMinute);
+                    $hours = $this->countHoursDifference($fromTime, $toTime);
+
+                    $this->editEntry($entryUuid, $place, $fromTime, $toTime, $hours, $wasDriver, $subAllowance, $dayOff);
+                    App::getMessages()->addMessage(new Message("Pomyślnie edytowano wpis", Message::INFO));
+                }
+            }
+            $this->renderEditEntryForm($entryUuid);
+            exit();
+        }
+        $this->renderEntriesTable();
     }
 
     public function action_deleteEntry() {
@@ -111,7 +144,7 @@ class EntryController {
                 App::getMessages()->addMessage(new Message("Nie udało się usunąć wpisu", Message::ERROR));
             }
         }
-        App::getRouter()->forwardTo("dashboard");
+        $this->renderEntriesTable();
     }
 
     private function getEntries($year=null, $month=null) {
@@ -134,10 +167,17 @@ class EntryController {
         return $entries;
     }
 
+    private function getEntry($entryUuid) {
+        $data = App::getDB()->select("work_hour_entry", "*", [
+            "uuid"=>$entryUuid,
+            "user_uuid"=>SessionUtils::load("userUuid", true)
+        ]);
+        return $data[0];
+    }
+
     private function addEntry($place, $fromDate, $toDate, $hours, $wasDriver, $subAllowance, $dayOff) {
-        $year = date("Y", strtotime($fromDate));
-        $monthIdx = intval(date("m", strtotime($fromDate)));
-        $month = $this->months[$monthIdx - 1];
+        // get year and month - function returns array - idx 0 is year, 1 - month
+        $yearAndMonth = $this->getYearAndMonth($fromDate);
         if ($this->checkAnotherEntryForSameDay($fromDate)){
             App::getMessages()->addMessage(new Message("Wpis dla dnia " . $fromDate . " już istnieje. 
             Aby wprowadzić nowy wpis dla danego dnia edytuj istniejący, lub usuń go i dodaj nowy.", Message::INFO));
@@ -146,13 +186,12 @@ class EntryController {
                 "uuid"=>generate_uuid(),
                 "from_date"=> $fromDate,
                 "to_date"=> $toDate,
-                // TODO count from hours
                 "hours"=> $hours,
                 "place"=>$place,
                 "was_driver"=>$wasDriver ? 1 : 0,
                 "subsistence_allowance"=>$subAllowance ? 1 : 0,
-                "year"=>$year,
-                "month"=>$month,
+                "year"=>$yearAndMonth[0],
+                "month"=>$yearAndMonth[1],
                 "day_off"=>$dayOff ? 1 : 0,
                 "user_uuid"=>SessionUtils::load("userUuid", true)
             ]);
@@ -164,12 +203,43 @@ class EntryController {
         $this->addEntry(null, $fromDate, null, null, null, true, 1);
     }
 
+    private function editEntry($entryUuid, $place, $fromDate, $toDate, $hours, $wasDriver, $subAllowance, $dayOff) {
+        // TODO fix date saving - its 1970-01-01
+        // get year and month - function returns array - idx 0 is year, 1 - month
+        $yearAndMonth = $this->getYearAndMonth($fromDate);
+        App::getDB()->update("work_hour_entry", [
+            "from_date"=> $fromDate,
+            "to_date"=> $toDate,
+            "hours"=> $hours,
+            "place"=>$place,
+            "was_driver"=>$wasDriver ? 1 : 0,
+            "subsistence_allowance"=>$subAllowance ? 1 : 0,
+            "year"=>$yearAndMonth[0],
+            "month"=>$yearAndMonth[1],
+            "day_off"=>$dayOff ? 1 : 0
+        ], [
+            "uuid"=>$entryUuid,
+            "user_uuid"=>SessionUtils::load("userUuid", true)
+        ]);
+    }
+
     private function deleteEntry($entryUuid) {
         $data = App::getDB()->delete("work_hour_entry", [
             "uuid"=>$entryUuid,
             "user_uuid"=>SessionUtils::load("userUuid", true)
         ]);
         return $data->rowCount();
+    }
+
+    private function entryExist($entryUuid) {
+        $result = App::getDB()->has("work_hour_entry", [
+            "uuid"=>$entryUuid,
+            "user_uuid"=>SessionUtils::load("userUuid", true)
+        ]);
+        if (!$result) {
+            App::getMessages()->addMessage(new Message("Wpis o podanym UUID nie istnieje", Message::ERROR));
+        }
+        return $result;
     }
 
     private function validateEntryData(&$place, &$fromDate, &$fromHour, &$fromMinute, &$toDate, &$toHour, &$toMinute, &$dayOff) {
@@ -278,7 +348,30 @@ class EntryController {
         return $this->monthsPl[array_search($this->currentMonth, $this->months)];
     }
 
-    private function renderTemplate($template) {
-        App::getSmarty()->display($template);
+    private function getYearAndMonth($fromDate) {
+        $year = date("Y", strtotime($fromDate));
+        $monthIdx = intval(date("m", strtotime($fromDate)));
+        $month = $this->months[$monthIdx - 1];
+        return array($year, $month);
     }
+
+    private function renderEntriesTable() {
+        App::getSmarty()->assign("description", "Godziny w bieżącym miesiącu (" .
+            $this->getCurrentMonthPl() . " $this->currentYear)");
+        App::getSmarty()->assign("entries", $this->getEntries($this->currentYear, $this->currentMonth));
+        App::getSmarty()->display("entriesTable.tpl");
+    }
+
+    private function renderAddEntryForm() {
+        App::getSmarty()->assign("description", "Dodaj wpis");
+        App::getSmarty()->display("addEntryForm.tpl");
+    }
+
+    private function renderEditEntryForm($entryUuid) {
+        App::getSmarty()->assign("description", "Edytuj wpis");
+        App::getSmarty()->assign("entry", $this->getEntry($entryUuid));
+        App::getSmarty()->display("editEntryForm.tpl");
+    }
+
+
 }

@@ -11,9 +11,7 @@ use core\Validator;
 class RecipientController {
 
     public function action_showRecipients() {
-        App::getSmarty()->assign("description", "Odbiorcy emaili");
-        App::getSmarty()->assign("recipients", $this->getRecipients());
-        $this->renderTemplate("recipientsTable.tpl");
+        $this->renderRecipientsTable();
     }
 
     public function action_addRecipient() {
@@ -27,12 +25,28 @@ class RecipientController {
                 App::getMessages()->addMessage(new Message("Pomyślnie dodano odbiorcę", Message::INFO));
             }
         }
-        App::getSmarty()->assign("description", "Dodaj odbiorcę");
-        $this->renderTemplate("recipientForm.tpl");
+        $this->renderAddRecipientForm();
     }
 
     public function action_editRecipient() {
+        $recipientUuid = ParamUtils::getFromGet("recipient_uuid");
+        $v = new Validator();
 
+        if ($v->validateUuid($recipientUuid) && $this->recipientExist($recipientUuid)) {
+            if ($_SERVER["REQUEST_METHOD"] === "POST") {
+                $firstName = ParamUtils::getFromPost("first_name");
+                $lastName = ParamUtils::getFromPost("last_name");
+                $email = ParamUtils::getFromPost("email");
+
+                if ($this->validateRecipientData($firstName, $lastName, $email)) {
+                    $this->editRecipient($recipientUuid, $firstName, $lastName, $email);
+                    App::getMessages()->addMessage(new Message("Pomyślnie edytowano odbiorcę", Message::INFO));
+                }
+            }
+            $this->renderEditRecipientForm($recipientUuid);
+            exit();
+        }
+        $this->renderRecipientsTable();
     }
 
     public function action_deleteRecipient() {
@@ -47,13 +61,21 @@ class RecipientController {
                 App::getMessages()->addMessage(new Message("Nie udało się usunąć odbiorcy", Message::ERROR));
             }
         }
-        App::getRouter()->forwardTo("showRecipients");
+        $this->renderRecipientsTable();
     }
 
     private function getRecipients() {
         return App::getDB()->select("recipient", "*", [
             "user_uuid"=>SessionUtils::load("userUuid", true)
         ]);
+    }
+
+    private function getRecipient($recipientUuid) {
+        $data = App::getDB()->select("recipient", "*", [
+            "uuid"=>$recipientUuid,
+            "user_uuid"=>SessionUtils::load("userUuid", true)
+        ]);
+        return $data[0];
     }
 
     private function addRecipient($firstName, $lastName, $email) {
@@ -66,12 +88,33 @@ class RecipientController {
         ]);
     }
 
+    private function editRecipient($recipientUuid, $firstName, $lastName, $email) {
+        return App::getDB()->update("recipient", [
+            "first_name"=>$firstName,
+            "last_name"=>$lastName,
+            "email"=>$email
+        ], [
+            "uuid"=>$recipientUuid,
+            "user_uuid"=>SessionUtils::load("userUuid", true)
+        ]);
+    }
+
     private function deleteRecipient($recipientUuid) {
         $data = App::getDB()->delete("recipient", [
             "uuid"=>$recipientUuid,
             "user_uuid"=>SessionUtils::load("userUuid", true)
         ]);
         return $data->rowCount();
+    }
+
+    private function recipientExist($recipientUuid) {
+        $result = App::getDB()->has("recipient", [
+            "uuid"=>$recipientUuid
+        ]);
+        if (!$result) {
+            App::getMessages()->addMessage(new Message("Odbiorca o podanym UUID nie istnieje", Message::ERROR));
+        }
+        return $result;
     }
 
     private function validateRecipientData(&$firstName, &$lastName, &$email) {
@@ -110,8 +153,21 @@ class RecipientController {
         return !App::getMessages()->isError();
     }
 
-    private function renderTemplate($template) {
-        App::getSmarty()->display($template);
+    private function renderRecipientsTable() {
+        App::getSmarty()->assign("description", "Odbiorcy emaili");
+        App::getSmarty()->assign("recipients", $this->getRecipients());
+        App::getSmarty()->display("recipientsTable.tpl");
+    }
+
+    private function renderAddRecipientForm() {
+        App::getSmarty()->assign("description", "Dodaj odbiorcę");
+        App::getSmarty()->display("addRecipientForm.tpl");
+    }
+
+    private function renderEditRecipientForm($recipientUuid) {
+        App::getSmarty()->assign("description", "Edytuj odbiorcę");
+        App::getSmarty()->assign("recipient", $this->getRecipient($recipientUuid));
+        App::getSmarty()->display("editRecipientForm.tpl");
     }
 
 }

@@ -20,13 +20,13 @@ Utils::addRoute('deleteEntry', 'EntryController', "user");
 // recepient routes
 Utils::addRoute('showRecipients', 'RecipientController', "user");
 Utils::addRoute('addRecipient', 'RecipientController', "user");
-//Utils::addRoute('editRecipient', 'RecipientController', "user");
+Utils::addRoute('editRecipient', 'RecipientController', "user");
 Utils::addRoute('deleteRecipient', 'RecipientController', "user");
 
 // email routes
 Utils::addRoute('showEmailTemplates', 'EmailTemplateController', "user");
 Utils::addRoute('addEmailTemplate', 'EmailTemplateController', "user");
-//Utils::addRoute('editEmailTemplate', 'EmailTemplateController', "user");
+Utils::addRoute('editEmailTemplate', 'EmailTemplateController', "user");
 Utils::addRoute('deleteEmailTemplate', 'EmailTemplateController', "user");
 
 // report routes
