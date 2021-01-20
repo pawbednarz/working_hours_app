@@ -14,7 +14,7 @@ Utils::addRoute('logout', 'LoginController');
 Utils::addRoute('dashboard', 'EntryController', ["admin", "user"]);
 Utils::addRoute('showEntries', 'EntryController', "user");
 Utils::addRoute('addEntry', 'EntryController', "user");
-//Utils::addRoute('editEntry', 'EntryController', "user");
+Utils::addRoute('editEntry', 'EntryController', "user");
 Utils::addRoute('deleteEntry', 'EntryController', "user");
 
 // recepient routes

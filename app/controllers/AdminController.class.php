@@ -12,9 +12,7 @@ use core\Validator;
 class AdminController {
 
     public function action_adminDashboard() {
-        App::getSmarty()->assign("description", "Panel administratora");
-        App::getSmarty()->assign("users", $this->getUsers());
-        $this->renderTemplate("usersTable.tpl");
+        $this->renderUsersTable();
     }
 
     public function action_addUser() {
@@ -34,30 +32,33 @@ class AdminController {
                 App::getMessages()->addMessage(new Message("Nie udało się dodać użytkownika", Message::INFO));
             }
         }
-        App::getSmarty()->assign("description", "Dodaj użytkownika");
-        $this->renderTemplate("addUserForm.tpl");
+        $this->renderAddUserForm();
     }
 
-    public function action_editUser() {
+    public function action_editUser()
+    {
         $userUuid = ParamUtils::getFromGet("uuid");
         $v = new Validator();
 
-        if ($v->validateUuid($userUuid) && $_SERVER["REQUEST_METHOD"] === "POST") {
-            $firstName = ParamUtils::getFromPost("first_name");
-            $lastName = ParamUtils::getFromPost("last_name");
-            $email = ParamUtils::getFromPost("email");
-            $role = (ParamUtils::getFromPost("role") === "admin") ? "admin" : "user";
-            $isActive = ParamUtils::getFromPost("is_active") == "true";
-            if ($this->validateUserNameEmailAndRole($firstName, $lastName, $email, $role)) {
-                $this->editUser($userUuid, $firstName, $lastName, $email, $role, $isActive);
-                App::getMessages()->addMessage(new Message("Pomyślnie edytowano użytkownika", Message::INFO));
-            } else {
-                App::getMessages()->addMessage(new Message("Nie udało się edytować użytkownika", Message::INFO));
+        if ($v->validateUuid($userUuid) && $this->userExist($userUuid)) {
+            if ($_SERVER["REQUEST_METHOD"] === "GET") {
+                $this->renderUserEditForm($userUuid);
+            } else if ($_SERVER["REQUEST_METHOD"] === "POST") {
+                $firstName = ParamUtils::getFromPost("first_name");
+                $lastName = ParamUtils::getFromPost("last_name");
+                $email = ParamUtils::getFromPost("email");
+                $role = (ParamUtils::getFromPost("role") === "admin") ? "admin" : "user";
+                $isActive = ParamUtils::getFromPost("is_active") == "true";
+
+                if ($this->validateUserNameEmailAndRole($firstName, $lastName, $email, $role)) {
+                    $this->editUser($userUuid, $firstName, $lastName, $email, $role, $isActive);
+                    App::getMessages()->addMessage(new Message("Pomyślnie edytowano użytkownika", Message::INFO));
+                }
+                $this->renderUserEditForm($userUuid);
+                exit();
             }
         }
-        App::getSmarty()->assign("user", $this->getUser($userUuid)[0]);
-        App::getSmarty()->assign("description", "Edytuj użytkownika");
-        $this->renderTemplate("editUserForm.tpl");
+        $this->renderUsersTable();
     }
 
     private function getUsers() {
@@ -108,6 +109,16 @@ class AdminController {
         ]);
     }
 
+    private function userExist($userUuid) {
+        $result = App::getDB()->has("user", [
+            "uuid"=>$userUuid
+        ]);
+        if (!$result) {
+            App::getMessages()->addMessage(new Message("Użytkownik o podanym UUID nie istnieje", Message::ERROR));
+        }
+        return $result;
+    }
+
     private function validateUserData(&$firstName, &$lastName, &$email, &$password, $passwordRepeat, $role) {
         if ($password != $passwordRepeat) {
             App::getMessages()->addMessage(new Message("Wprowadzone hasła nie są takie same", Message::ERROR));
@@ -149,7 +160,7 @@ class AdminController {
             "trim"=>"true",
             "min_length"=>3,
             "max_length"=>80,
-            "validator_message"=>'"Imię" powinno mieć od 3 do 80 znaków'
+            "validator_message"=>'"Nazwisko" powinno mieć od 3 do 80 znaków'
         ]);
 
         // TODO check if mail is unique
@@ -171,7 +182,20 @@ class AdminController {
         return !App::getMessages()->isError();
     }
 
-    private function renderTemplate($template) {
-        App::getSmarty()->display($template);
+    private function renderUsersTable() {
+        App::getSmarty()->assign("description", "Panel administratora");
+        App::getSmarty()->assign("users", $this->getUsers());
+        App::getSmarty()->display("usersTable.tpl");
+    }
+
+    private function renderAddUserForm() {
+        App::getSmarty()->assign("description", "Dodaj użytkownika");
+        App::getSmarty()->display("addUserForm.tpl");
+    }
+
+    private function renderUserEditForm($userUuid) {
+        App::getSmarty()->assign("user", $this->getUser($userUuid)[0]);
+        App::getSmarty()->assign("description", "Edytuj użytkownika");
+        App::getSmarty()->display("editUserForm.tpl");
     }
 }
