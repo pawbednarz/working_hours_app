@@ -267,7 +267,7 @@ class Validator {
     public function validateUuid($uuid) {
         $this->validate($uuid, [
             "required" => true,
-            "required_message" => "Nie podano UUID użytkownika do edycji",
+            "required_message" => "UUID obiektu jest wymagane",
             "min_length" => 36,
             "max_length" => 36,
             "regexp" => "/[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/",
