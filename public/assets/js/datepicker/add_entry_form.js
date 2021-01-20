@@ -20,35 +20,25 @@ const datepickerOptions = {
     "daysOfWeekHighlighted": [1,2,3,4,5]
 }
 const datepickerFrom = new Datepicker(dateFrom);
-datepickerFrom.setOptions(datepickerOptions);
-
-dateFrom.addEventListener("changeDate", function() {
-    datepickerTo.setDate(datepickerFrom.getDate());
-    dateFromHour.focus();
-})
-
 const datepickerTo = new Datepicker(dateTo)
-datepickerTo.setOptions({
-    "autohide": true,
-    "disableTouchKeyboard": true
-});
-
-dateTo.addEventListener("changeDate", function() {
-    dateToHour.focus();
-})
+datepickerFrom.setOptions(datepickerOptions);
+datepickerTo.setOptions(datepickerOptions);
 
 let today = new Date().toISOString().slice(0, 10)
 
 datepickerFrom.setDate(today);
 datepickerTo.setDate(today);
 
-const checkboxes = document.querySelectorAll("input[type=checkbox");
-
-checkboxes.forEach((checkbox) => {
-    checkbox.addEventListener("change", () => {
-        checkbox.checked ? checkbox.setAttribute("value", true) : checkbox.setAttribute("value", false)
-    })
+dateFrom.addEventListener("changeDate", function() {
+    datepickerTo.setDate(datepickerFrom.getDate());
+    dateFromHour.focus();
 })
+
+dateTo.addEventListener("changeDate", function() {
+    dateToHour.focus();
+})
+
+const checkboxes = document.querySelectorAll("input[type=checkbox");
 
 const dayOff = checkboxes[2];
 
