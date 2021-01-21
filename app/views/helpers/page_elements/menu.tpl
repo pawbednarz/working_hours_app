@@ -13,7 +13,7 @@
 {*                        <li><a href="#">Poprzednie miesiące</a></li>*}
                     </ul>
                 </li>
-{*                <li><a href="#">Raporty</a></li>*}
+                <li><a href="{$conf->action_url}showReports">Raporty</a></li>
                 <li>
                     <span class="opener">Konfiguracja Email</span>
                     <ul>
