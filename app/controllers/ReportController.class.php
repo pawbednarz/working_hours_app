@@ -16,23 +16,78 @@ class ReportController {
 
     public function action_generateReport() {
         if ($_SERVER["REQUEST_METHOD"] === "POST") {
+            // TODO fix formula injection vulnerability
             $fromDate = ParamUtils::getFromPost("date_from");
             $toDate = ParamUtils::getFromPost("date_to");
 
             if ($this->validateDates($fromDate, $toDate)) {
                 $entries = $this->getEntries($fromDate, $toDate);
-//                App::getSmarty()->assign("entries", $entries);
-//                App::getSmarty()->display("entriesTable.tpl");
-                $this->generateReport($entries);
+                $this->generateReport($entries, $fromDate, $toDate);
+                App::getMessages()->addMessage(new Message("Pomyślnie wygenerowano raport", Message::INFO));
             }
         }
         $this->renderGenerateReportForm();
+    }
+
+    public function action_downloadReport() {
+        $reportUuid = ParamUtils::getFromGet("report_uuid");
+        $v = new Validator();
+
+        if ($v->validateUuid($reportUuid) && $this->reportExist($reportUuid)) {
+            $report = $this->getReport($reportUuid);
+            echo $report["path"];
+            header('Content-Type: text/csv');
+            header('Content-Disposition: attachment; filename="' . $report["filename"] . '";');
+            ob_clean();
+            flush();
+            readfile($report["path"]);
+        }
+        //$this->renderReportsTable();
+    }
+
+    public function action_deleteReport() {
+
     }
 
     private function getReports() {
         return App::getDB()->select("report", "*", [
             "user_uuid"=>SessionUtils::load("userUuid", true)
         ]);
+    }
+
+    private function getReport($reportUuid) {
+        return App::getDB()->select("report", "*", [
+            "uuid"=>$reportUuid,
+            "user_uuid"=>SessionUtils::load("userUuid", true)
+        ])[0];
+    }
+
+    private function addReport($path, $filename, $fromDate, $toDate) {
+        return App::getDB()->insert("report", [
+            "uuid"=>generate_uuid(),
+            "path"=>$path,
+            "filename"=>$filename,
+            "creation_date"=>date("Y-m-d H:i"),
+            "from_date"=>$fromDate,
+            "to_date"=>$toDate,
+            "user_uuid"=>SessionUtils::load("userUuid", true)
+        ]);
+    }
+
+    private function reportExist($reportUuid) {
+        $report = App::getDB()->select("report", [
+            "path",
+            "filename"
+        ],[
+            "uuid"=>$reportUuid,
+            "user_uuid"=>SessionUtils::load("userUuid", true)
+        ]);
+        if (count($report) == 1) {
+            return file_exists($report[0]["path"]);
+        } else {
+            App::getMessages()->addMessage(new Message("Nie znaleziono raportu o podanym UUID", Message::ERROR));
+        }
+        return false;
     }
 
     private function getEntries($fromDate, $toDate) {
@@ -55,12 +110,13 @@ class ReportController {
         ]);
     }
 
-    private function generateReport($entryArray) {
+    private function generateReport($entryArray, $fromDate, $toDate) {
         // head data for csv file
         $csvHead = array("Data", "Miejsce", "Od-Do", "Godziny", "Kierowca", "Dieta", "Dzien wolny");
-
+        $filename = "file_" . date("m-d H:i") . ".csv";
+        $path = App::getConf()->reports_path . $filename;
         // open file and write head data
-        $fp = fopen(App::getConf()->reports_path . "file1.csv", "w");
+        $fp = fopen($path, "w");
         fputcsv($fp, $csvHead);
 
         // write each entry to file
@@ -70,9 +126,10 @@ class ReportController {
                 $entry["place"],
                 date("H:i", strtotime($entry["from_date"])) . "-" . date ("H:i", strtotime($entry["to_date"])),
                 str_replace(".", ",", $entry["hours"]),
-                $entry["was_driver"],
-                $entry["subsistence_allowance"],
-                $entry["day_off"]
+                // TODO check why this three are not written to file
+                $entry["was_driver"] ? "Tak" : "",
+                $entry["subsistence_allowance"] ? "Tak" : "",
+                $entry["day_off"] ? "Tak" : ""
             );
             fputcsv($fp, $data);
         }
@@ -80,6 +137,8 @@ class ReportController {
         fputcsv($fp, array());
         fputcsv($fp, array("", "", "", "=SUMA(D2:D" . (count($entryArray) + 1) . ")"));
         fclose($fp);
+        // add report to database
+        $this->addReport($path, $filename, $fromDate, $toDate);
     }
 
     private function validateDates($fromDate, $toDate) {

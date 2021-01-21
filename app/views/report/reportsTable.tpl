@@ -12,10 +12,11 @@
             <tbody>
             {foreach $reports as $report}
                 <tr>
-                    <td>{$report["creation_date"]}</td>
-                    <td>{$report["path"]}</td>
-                    <td>{$report["date"]}</td>
+                    <td>{$report["creation_date"]|substr:0:16}</td>
+                    <td>{$report["filename"]}</td>
+                    <td>{$report["from_date"]|substr:0:10} - {$report["to_date"]|substr:0:10}</td>
                     <td class="table-buttons">
+                        <a href="{$conf->action_url}downloadReport&report_uuid={$report["uuid"]}" class="fas fa-arrow-circle-down"><span class="label"></span></a>
                         <form class="delete-entry-button-form" method="post" action="{$conf->action_url}deleteReport">
                             <input type="hidden" value="{$report["uuid"]}" name="report_uuid">
                             <button class="far fa-trash-alt entry-button"><span class="label"></span></button>
