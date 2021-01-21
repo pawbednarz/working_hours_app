@@ -2333,3 +2333,9 @@ button,
   .margin-top-1 {
     margin-top: 1em;
   }
+
+  .report-label {
+    display: flex;
+    justify-content: flex-end;
+    line-height: 3em;
+  }
