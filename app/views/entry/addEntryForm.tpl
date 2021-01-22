@@ -1,6 +1,5 @@
 {extends file="main.tpl"}
 {block name="content"}
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vanillajs-datepicker@1.1.1/dist/css/datepicker.min.css">
 <form method="post" action="{$conf->action_url}{$action}" class="padding-top-1-5 margin-bottom-1">
     <div class="row gtr-uniform">
         <div class="col-12 col-12-xsmall">
