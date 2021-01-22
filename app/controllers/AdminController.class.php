@@ -117,6 +117,16 @@ class AdminController {
         return $result;
     }
 
+    private function userExistByEmail($email) {
+        $result = App::getDB()->has("user", [
+            "email"=>$email
+        ]);
+        if ($result) {
+            App::getMessages()->addMessage(new Message("Podany email jest już zajęty", Message::ERROR));
+        }
+        return $result;
+    }
+
     private function validateUserData(&$firstName, &$lastName, &$email, &$password, $passwordRepeat, $role) {
         if ($password != $passwordRepeat) {
             App::getMessages()->addMessage(new Message("Wprowadzone hasła nie są takie same", Message::ERROR));
@@ -161,7 +171,6 @@ class AdminController {
             "validator_message"=>'"Nazwisko" powinno mieć od 3 do 80 znaków'
         ]);
 
-        // TODO check if mail is unique
         $email = $v->validate($email, [
             "required"=>"true",
             "required_message"=>'"Email" jest wymagany',
@@ -175,6 +184,10 @@ class AdminController {
 
         if (!in_array($role, ["admin", "user"])) {
             App::getMessages()->addMessage(new Message("Jedyne dozwolone role to admin oraz user", Message::ERROR));
+        }
+
+        if ($this->userExistByEmail($email)) {
+            return false;
         }
 
         return !App::getMessages()->isError();
