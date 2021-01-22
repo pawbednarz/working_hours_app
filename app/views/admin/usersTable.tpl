@@ -20,7 +20,7 @@
                 <td>{$user["role"]}</td>
                 <td>{($user["is_active"]) ? "Tak" : "Nie"}</td>
                 <td class="table-buttons">
-                    <a href="{$conf->action_url}editUser&uuid={$user["uuid"]}" class="fas fa-edit"><span class="label"></span></a>
+                    <a href="{$conf->action_url}editUser&user_uuid={$user["uuid"]}" class="fas fa-edit"><span class="label"></span></a>
                 </td>
             </tr>
         {/foreach}
