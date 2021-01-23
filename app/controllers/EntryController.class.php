@@ -19,16 +19,6 @@ class EntryController {
     private $monthsPl = ["Styczeń", "Luty", "Marzec", "Kwiecień", "Maj", "Czerwiec", "Lipiec", "Sierpień", "Wrzesień",
         "Październik", "Listopad", "Grudzień"];
 
-    private $place;
-    private $fromDate;
-    private $fromHour;
-    private $fromMinute;
-    private $toDate;
-    private $toHour;
-    private $toMinute;
-    private $wasDriver;
-    private $subAllowance;
-    private $dayOff;
     private $currentYear;
     private $currentMonth;
 
@@ -51,40 +41,28 @@ class EntryController {
     public function action_addEntry() {
         if ($_SERVER["REQUEST_METHOD"] === "POST") {
             // get request parameters
-            $this->place = ParamUtils::getFromPost("place");
-            $this->fromDate = ParamUtils::getFromPost("date_from");
-            $this->toDate = ParamUtils::getFromPost("date_to");
-            $this->wasDriver = ParamUtils::getFromPost("driver") == "true";
-            $this->subAllowance = ParamUtils::getFromPost("subsistence_allowance") == "true";
-            $this->dayOff = ParamUtils::getFromPost("day_off") == "true";
-            $this->fromHour = intval(ParamUtils::getFromPost("time_from_hour"));
-            $this->fromMinute = intval(ParamUtils::getFromPost("time_from_minute"));
-            $this->toHour = intval(ParamUtils::getFromPost("time_to_hour"));
-            $this->toMinute = intval(ParamUtils::getFromPost("time_to_minute"));
+            $place = ParamUtils::getFromPost("place");
+            $fromDate = ParamUtils::getFromPost("date_from");
+            $fromTime = ParamUtils::getFromPost("time_from");
+            $toDate = ParamUtils::getFromPost("date_to");
+            $toTime = ParamUtils::getFromPost("time_to");
+            $wasDriver = ParamUtils::getFromPost("driver") == "true";
+            $subAllowance = ParamUtils::getFromPost("subsistence_allowance") == "true";
+            $dayOff = ParamUtils::getFromPost("day_off") == "true";
 
             // validate parameters
-            $validationResult = $this->validateEntryData(
-                $this->place,
-                $this->fromDate,
-                $this->fromHour,
-                $this->fromMinute,
-                $this->toDate,
-                $this->toHour,
-                $this->toMinute,
-                $this->dayOff
-                );
+            $validationResult = $this->validateEntryData($place, $fromDate, $toDate, $fromTime,
+                $toTime, $dayOff);
 
             if ($validationResult) {
-                if ($this->dayOff) {
-                    $this->addDayOffEntry($this->fromDate);
+                if ($dayOff) {
+                    $this->addDayOffEntry($fromDate);
                 } else {
+                    $fromDateAndTime = $this->formatDateAndTime($fromDate, $fromTime);
+                    $toDateAndTime = $this->formatDateAndTime($toDate, $toTime);
+                    $hours = $this->countHoursDifference($fromDateAndTime, $toDateAndTime);
 
-                    $fromTime = $this->formatDateAndTime($this->fromDate, $this->fromHour, $this->fromMinute);
-                    $toTime = $this->formatDateAndTime($this->toDate, $this->toHour, $this->toMinute);
-                    $hours = $this->countHoursDifference($fromTime, $toTime);
-
-                    $this->addEntry($this->place, $fromTime, $toTime, $hours, $this->wasDriver,
-                        $this->subAllowance, 0);
+                    $this->addEntry($place, $fromDateAndTime, $toDateAndTime, $hours, $wasDriver, $subAllowance, 0);
                 }
             }
         }
@@ -100,26 +78,16 @@ class EntryController {
                 $place = ParamUtils::getFromPost("place");
                 $fromDate = ParamUtils::getFromPost("date_from");
                 $toDate = ParamUtils::getFromPost("date_to");
+                $fromTime = intval(ParamUtils::getFromPost("time_to"));
+                $toTime = intval(ParamUtils::getFromPost("time_from"));
                 $wasDriver = ParamUtils::getFromPost("driver") == "true";
                 $subAllowance = ParamUtils::getFromPost("subsistence_allowance") == "true";
                 $dayOff = ParamUtils::getFromPost("day_off") == "true";
-                $fromHour = intval(ParamUtils::getFromPost("time_from_hour"));
-                $fromMinute = intval(ParamUtils::getFromPost("time_from_minute"));
-                $toHour = intval(ParamUtils::getFromPost("time_to_hour"));
-                $toMinute = intval(ParamUtils::getFromPost("time_to_minute"));
-                $validationResult = $this->validateEntryData(
-                    $place,
-                    $fromDate,
-                    $fromHour,
-                    $fromMinute,
-                    $toDate,
-                    $toHour,
-                    $toMinute,
-                    $dayOff
-                );
+                $validationResult = $this->validateEntryData($place, $fromDate, $toDate, $fromTime,
+                    $toTime, $dayOff);
                 if ($validationResult) {
-                    $fromTime = $this->formatDateAndTime($this->fromDate, $this->fromHour, $this->fromMinute);
-                    $toTime = $this->formatDateAndTime($this->toDate, $this->toHour, $this->toMinute);
+                    $fromTime = $this->formatDateAndTime($fromDate, $fromTime);
+                    $toTime = $this->formatDateAndTime($toDate, $toTime);
                     $hours = $this->countHoursDifference($fromTime, $toTime);
 
                     $this->editEntry($entryUuid, $place, $fromTime, $toTime, $hours, $wasDriver, $subAllowance, $dayOff);
@@ -179,13 +147,13 @@ class EntryController {
         // get year and month - function returns array - idx 0 is year, 1 - month
         $yearAndMonth = $this->getYearAndMonth($fromDate);
         if ($this->checkAnotherEntryForSameDay($fromDate)){
-            App::getMessages()->addMessage(new Message("Wpis dla dnia " . $fromDate . " już istnieje. 
+            App::getMessages()->addMessage(new Message("Wpis dla dnia " . $fromDate->format("Y-m-d") . " już istnieje. 
             Aby wprowadzić nowy wpis dla danego dnia edytuj istniejący, lub usuń go i dodaj nowy.", Message::INFO));
         } else {
             App::getDB()->insert("work_hour_entry", [
                 "uuid"=>generate_uuid(),
-                "from_date"=> $fromDate,
-                "to_date"=> $toDate,
+                "from_date"=> $fromDate->format("Y-m-d H:i"),
+                "to_date"=> $toDate->format("Y-m-d H:i"),
                 "hours"=> $hours,
                 "place"=>$place,
                 "was_driver"=>$wasDriver ? 1 : 0,
@@ -195,7 +163,7 @@ class EntryController {
                 "day_off"=>$dayOff ? 1 : 0,
                 "user_uuid"=>SessionUtils::load("userUuid", true)
             ]);
-            App::getMessages()->addMessage(new Message("Pomyślnie dodano wpis dla dnia $this->fromDate", Message::INFO));
+            App::getMessages()->addMessage(new Message("Pomyślnie dodano wpis dla dnia " . $fromDate->format("Y-m-d"), Message::INFO));
         }
     }
 
@@ -242,20 +210,17 @@ class EntryController {
         return $result;
     }
 
-    private function validateEntryData(&$place, &$fromDate, &$fromHour, &$fromMinute, &$toDate, &$toHour, &$toMinute, &$dayOff) {
+    private function validateEntryData(&$place, &$fromDate, &$toDate, &$fromTime, &$toTime, &$dayOff) {
         $paramRequired = true;
         $v = new Validator();
-        // if day is off validate date only, and return result
+        // if day is off validate fromDate only, and return result
         if ($dayOff) {
             $paramRequired = false;
         }
 
-        // TODO assign $fromDate = $v->validate (same for toDate) and refactor function handling date operations
-        // to use DateTime class and OOP approach
-
         // TODO fix problem when hour/minute is not passed, than it is validated correctly
 
-        $v->validate($fromDate, [
+        $fromDate = $v->validate($fromDate, [
             "required"=>"true",
             "required_message"=>'"Data od" jest wymagana przy wprowadzaniu dnia wolnego',
             "trim"=>"true",
@@ -265,7 +230,7 @@ class EntryController {
             "validator_message"=>'Niepoprawny format "Data od" (wymagany: YYYY-mm-dd)'
         ]);
 
-        $v->validate($toDate, [
+        $toDate = $v->validate($toDate, [
             "required"=>$paramRequired,
             "required_message"=>'"Data do" jest wymagana przy wprowadzaniu dnia pracującego',
             "trim"=>"true",
@@ -285,63 +250,44 @@ class EntryController {
             "validator_message"=>"Miejsce musi mieć od 3 do 90 znaków"
         ]);
 
-        $fromHour = $v->validate($fromHour, [
+        $fromTime = $v->validate($fromTime, [
            "required"=>$paramRequired,
            "required_message"=>'"Godzina od" jest wymagana przy wprowadzaniu dnia pracującego',
-           "int"=>"true",
-           "min"=> 00,
-           "max"=>23,
-           "validator_message"=>'"Godzina od" musi być w zakresie od 00 do 23'
+           "date_format"=>"H:i",
+           "validator_message"=>'Niepoprawny format "Godzina od" (wymagany: HH:MM)'
         ]);
 
-        $toHour = $v->validate($toHour, [
+        $toTime = $v->validate($toTime, [
             "required"=>$paramRequired,
             "required_message"=>'"Godzina do" jest wymagana przy wprowadzaniu dnia pracującego',
-            "int"=>"true",
-            "min"=> 00,
-            "max"=>23,
-            "validator_message"=>'"Godzina do" musi być w zakresie od 00 do 23'
-        ]);
-
-        $fromMinute = $v->validate($fromMinute, [
-            "required"=>$paramRequired,
-            "required_message"=>'"Minuta od" jest wymagana przy wprowadzaniu dnia pracującego',
-            "int"=>"true",
-            "min"=> 0,
-            "max"=>59,
-            "validator_message"=>'"Minuta od" musi być w zakresie od 00 do 59'
-        ]);
-
-        $toMinute = $v->validate($toMinute, [
-            "required"=>$paramRequired,
-            "required_message"=>'"Minuta do" jest wymagana przy wprowadzaniu dnia pracującego',
-            "int"=>"true",
-            "min"=> 0,
-            "max"=>59,
-            "validator_message"=>'"Minuta do" musi być w zakresie od 00 do 59'
+            "date_format"=>"H:i",
+            "validator_message"=>'Niepoprawny format "Godzina do" (wymagany: HH:MM)'
         ]);
 
         return !App::getMessages()->isError();
     }
 
     private function checkAnotherEntryForSameDay($fromDate) {
-        $date = date("Y-m-d",strtotime($fromDate));
+        $date = $fromDate->format("Y-m-d");
         return App::getDB()->count("work_hour_entry", [
             "from_date[~]"=>$date . "%",
             "user_uuid"=>SessionUtils::load("userUuid", true)
         ]);
     }
 
-    private function formatDateAndTime($date, $hours, $minutes) {
-        $dateWithTime = "$date $hours:$minutes";
-        return date("Y-m-d H:i:s", strtotime($dateWithTime));
+    private function formatDateAndTime(\DateTime $date, \DateTime $time) {
+        $timeArr = explode(":", $time->format("H:i"));
+        $date->setTime(intval($timeArr[0]), intval($timeArr[1]));
+        return $date;
     }
 
-    private function countHoursDifference($fromTime, $toTime) {
-        $from = strtotime($fromTime);
-        $to = strtotime($toTime);
-        // subtract dates and divide by 3600 to get difference in hours
-        return ($to - $from) / 3600;
+    private function countHoursDifference(\DateTime $fromTime, \DateTime $toTime) {
+        $diff = $fromTime->diff($toTime);
+        $hours = $diff->h;
+        if ($diff->i == 30) {
+            $hours += 0.5;
+        }
+        return $hours;
     }
 
     private function getCurrentMonthPl() {
@@ -349,8 +295,9 @@ class EntryController {
     }
 
     private function getYearAndMonth($fromDate) {
-        $year = date("Y", strtotime($fromDate));
-        $monthIdx = intval(date("m", strtotime($fromDate)));
+        $year = $fromDate->format("Y");
+        //$year = date("Y", strtotime($fromDate));
+        $monthIdx = intval($fromDate->format("m"));
         $month = $this->months[$monthIdx - 1];
         return array($year, $month);
     }
