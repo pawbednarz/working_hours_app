@@ -11,5 +11,6 @@
         <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
         <link rel="stylesheet" href="{$conf->assets_url}css/main.css" />
         <link rel="stylesheet" href="{$conf->assets_url}css/datepicker/datepicker.min.css" />
+        <link rel="stylesheet" href="{$conf->assets_url}css/datepicker/picker.css" />
     </head>
     <body class="is-preload">
