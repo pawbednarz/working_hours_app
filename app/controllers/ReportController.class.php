@@ -35,14 +35,15 @@ class ReportController {
 
         if ($v->validateUuid($reportUuid) && $this->reportExist($reportUuid)) {
             $report = $this->getReport($reportUuid);
-            echo $report["path"];
+            $filePath = App::getConf()->reports_path . $report["filename"];
             header('Content-Type: text/csv');
             header('Content-Disposition: attachment; filename="' . $report["filename"] . '";');
+            header("Content-Length: " . filesize($filePath));
             ob_clean();
             flush();
-            readfile($report["path"]);
+            readfile($filePath);
         }
-        //$this->renderReportsTable();
+        $this->renderReportsTable();
     }
 
     public function action_deleteReport() {
@@ -62,10 +63,9 @@ class ReportController {
         ])[0];
     }
 
-    private function addReport($path, $filename, $fromDate, $toDate) {
+    private function addReport($filename, $fromDate, $toDate) {
         return App::getDB()->insert("report", [
             "uuid"=>generate_uuid(),
-            "path"=>$path,
             "filename"=>$filename,
             "creation_date"=>date("Y-m-d H:i"),
             "from_date"=>$fromDate,
@@ -76,18 +76,22 @@ class ReportController {
 
     private function reportExist($reportUuid) {
         $report = App::getDB()->select("report", [
-            "path",
             "filename"
         ],[
             "uuid"=>$reportUuid,
             "user_uuid"=>SessionUtils::load("userUuid", true)
         ]);
-        if (count($report) == 1) {
-            return file_exists($report[0]["path"]);
-        } else {
-            App::getMessages()->addMessage(new Message("Nie znaleziono raportu o podanym UUID", Message::ERROR));
+        if (count($report) == 1 && file_exists(App::getConf()->reports_path . $report[0]["filename"])) {
+            return true;
         }
+        App::getMessages()->addMessage(new Message("Nie znaleziono raportu o podanym UUID", Message::ERROR));
         return false;
+    }
+
+    private function directoryExistAndCreate($path) {
+        if (!file_exists($path)) {
+            mkdir($path, 0755, true);
+        }
     }
 
     private function getEntries($fromDate, $toDate) {
@@ -113,7 +117,8 @@ class ReportController {
     private function generateReport($entryArray, $fromDate, $toDate) {
         // head data for csv file
         $csvHead = array("Data", "Miejsce", "Od-Do", "Godziny", "Kierowca", "Dieta", "Dzien wolny");
-        $filename = "file_" . date("m-d H:i") . ".csv";
+        $filename = "file_" . date("m-d-H:i") . ".csv";
+        $this->directoryExistAndCreate(App::getConf()->reports_path);
         $path = App::getConf()->reports_path . $filename;
         // open file and write head data
         $fp = fopen($path, "w");
@@ -126,7 +131,6 @@ class ReportController {
                 $entry["place"],
                 date("H:i", strtotime($entry["from_date"])) . "-" . date ("H:i", strtotime($entry["to_date"])),
                 str_replace(".", ",", $entry["hours"]),
-                // TODO check why this three are not written to file
                 $entry["was_driver"] ? "Tak" : "",
                 $entry["subsistence_allowance"] ? "Tak" : "",
                 $entry["day_off"] ? "Tak" : ""
@@ -138,7 +142,7 @@ class ReportController {
         fputcsv($fp, array("", "", "", "=SUMA(D2:D" . (count($entryArray) + 1) . ")"));
         fclose($fp);
         // add report to database
-        $this->addReport($path, $filename, $fromDate, $toDate);
+        $this->addReport($filename, $fromDate, $toDate);
     }
 
     private function validateDates($fromDate, $toDate) {
