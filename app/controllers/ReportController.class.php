@@ -47,7 +47,18 @@ class ReportController {
     }
 
     public function action_deleteReport() {
+        $reportUuid = ParamUtils::getFromPost("report_uuid");
+        $v = new Validator();
 
+        if ($v->validateUuid($reportUuid) && $this->reportExist($reportUuid)) {
+
+            if ($this->deleteReport($reportUuid)) {
+                App::getMessages()->addMessage(new Message("Pomyślnie usunięto raport", Message::INFO));
+            } else {
+                App::getMessages()->addMessage(new Message("Nie udało się usunąć raportu", Message::ERROR));
+            }
+        }
+        $this->renderReportsTable();
     }
 
     private function getReports() {
@@ -72,6 +83,30 @@ class ReportController {
             "to_date"=>$toDate,
             "user_uuid"=>SessionUtils::load("userUuid", true)
         ]);
+    }
+
+    private function deleteReport($reportUuid) {
+        $filename = $this->getReport($reportUuid)["filename"];
+        return $this->deleteReportFromDb($reportUuid) && $this->deleteReportFromDisk($filename);
+    }
+
+    private function deleteReportFromDb($reportUuid) {
+        $data = App::getDB()->delete("report", [
+            "uuid"=>$reportUuid,
+            "user_uuid"=>SessionUtils::load("userUuid", true)
+        ]);
+        if (!$data->rowCount()) {
+            App::getMessages()->addMessage(new Message("Nie udało się usunąć raportu z bazy danych", Message::ERROR));
+        }
+        return $data->rowCount();
+    }
+
+    private function deleteReportFromDisk($filename) {
+        $result = unlink(App::getConf()->reports_path . $filename);
+        if (!$result) {
+            App::getMessages()->addMessage(new Message("Nie udało się usunąć pliku raportu z serwera", Message::ERROR));
+        }
+        return $result;
     }
 
     private function reportExist($reportUuid) {
