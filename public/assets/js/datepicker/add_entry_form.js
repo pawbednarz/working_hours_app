@@ -62,6 +62,10 @@ dayOff.addEventListener("change", () => {
     }
 })
 
+if (dayOff.checked) {
+    disableFormFields();
+}
+
 function disableFormFields() {
     place.setAttribute("disabled", "");
     timeFrom.setAttribute("disabled", "");

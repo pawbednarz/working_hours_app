@@ -6,25 +6,19 @@
                 <input type="text" name="place" id="place" placeholder="Miejsce" value="{$entry["place"]}">
             </div>
             <div class="col-2 col-4-xlarge col-6-medium">
-                <input class="datepicker" type="text" name="date_from" id="date_from" placeholder="Data od value="{$entry["from_date"]|substr:0:10}">
+                <input class="datepicker" type="text" name="date_from" id="date_from" placeholder="Data od" value="{$entry["from_date"]|substr:0:10}">
             </div>
             <div class="col-1 col-2-xlarge col-3-medium">
-                <input class="hour_picker" type="number" name="time_from_hour" id="time_from_hour" min="0" max="23" placeholder="G" value="{$entry["from_date"]|substr:11:2}">
+                <input class="hour_picker" type="text" name="time_from" id="time_from" placeholder="G:M" value="{$entry["from_date"]|substr:11:5}">
             </div>
-            <div class="col-1 col-2-xlarge col-3-medium">
-                <input class="hour_picker" type="number" name="time_from_minute" id="time_from_minute" step="10" min="0" max="59" placeholder="M" value="{$entry["from_date"]|substr:14:2}">
-            </div>
-            <div class="col-7 col-4-xlarge col-0-medium"></div>
+            <div class="col-9 col-4-xlarge col-0-medium"></div>
             <div class="col-2 col-4-xlarge col-6-medium">
                 <input class="datepicker" type="text" name="date_to" id="date_to" placeholder="Data do" value="{$entry["to_date"]|substr:0:10}">
             </div>
             <div class="col-1 col-2-xlarge col-3-medium">
-                <input class="hour_picker" type="text" name="time_to_hour" id="time_to_hour" min="0" max="23" placeholder="G" value="{$entry["to_date"]|substr:11:2}">
+                <input class="hour_picker" type="text" name="time_to" id="time_to" placeholder="G:M" value="{$entry["to_date"]|substr:11:5}">
             </div>
-            <div class="col-1 col-2-xlarge col-3-medium">
-                <input class="hour_picker" type="text" name="time_to_minute" id="time_to_minute" step="10" min="0" max="59" placeholder="M" value="{$entry["to_date"]|substr:14:2}">
-            </div>
-            <div class="col-7 col-4-xlarge col-0-medium"></div>
+            <div class="col-9 col-4-xlarge col-0-medium"></div>
             <div class="col-12 col-12-small">
                 <input type="checkbox" id="driver" name="driver" value="true" {if $entry["was_driver"]}checked{/if}>
                 <label for="driver">Kierowca</label>
@@ -47,6 +41,8 @@
             <a class="button fit" href="{$conf->action_url}dashboard">Powrót</a>
         </div>
     </div>
+    <script src="{$conf->assets_url}js/datepicker/picker.js"></script>
     <script src="{$conf->assets_url}js/datepicker/datepicker.min.js"></script>
     <script src="{$conf->assets_url}js/datepicker/add_entry_form.js"></script>
 {/block}
+

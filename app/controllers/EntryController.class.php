@@ -38,6 +38,7 @@ class EntryController {
         $this->getEntries();
     }
 
+    // TODO refactor method to work and editForm to use new timepicker
     public function action_addEntry() {
         if ($_SERVER["REQUEST_METHOD"] === "POST") {
             // get request parameters
@@ -153,7 +154,7 @@ class EntryController {
             App::getDB()->insert("work_hour_entry", [
                 "uuid"=>generate_uuid(),
                 "from_date"=> $fromDate->format("Y-m-d H:i"),
-                "to_date"=> $toDate->format("Y-m-d H:i"),
+                "to_date"=> is_null($toDate) ? null : $toDate->format("Y-m-d H:i"),
                 "hours"=> $hours,
                 "place"=>$place,
                 "was_driver"=>$wasDriver ? 1 : 0,
@@ -168,7 +169,8 @@ class EntryController {
     }
 
     private function addDayOffEntry($fromDate) {
-        $this->addEntry(null, $fromDate, null, null, null, true, 1);
+        $fromDate->setTime(0, 0);
+        $this->addEntry(null, $fromDate, null, null, null, null, 1);
     }
 
     private function editEntry($entryUuid, $place, $fromDate, $toDate, $hours, $wasDriver, $subAllowance, $dayOff) {
