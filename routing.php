@@ -37,9 +37,7 @@ Utils::addRoute('deleteReport', 'ReportController', "user");
 
 // send email routes
 //Utils::addRoute('sendEmail', 'EmailSendController', "user");
-//Utils::addRoute('sendReport', 'EmailSendController', "user");
-
-//Utils::addRoute('showEmails', 'EmailSendController', "user");
+Utils::addRoute('showEmails', 'EmailSendController', "user");
 //Utils::addRoute('showEmail', 'EmailSendController', "user");
 //Utils::addRoute('deleteEmail', 'EmailSendController', "user");
 
