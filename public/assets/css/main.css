@@ -2302,7 +2302,7 @@ button,
     -moz-appearance: textfield;
   }
 
-  input[disabled], input[disabled] + label {
+  input[disabled], input[disabled] + label , textarea{
     background-color: #e6ebed;
   }
 
@@ -2334,8 +2334,9 @@ button,
     margin-top: 1em;
   }
 
-  .report-label {
+  .input-label {
     display: flex;
     justify-content: flex-end;
     line-height: 3em;
+    font-size: 0.99em;
   }
