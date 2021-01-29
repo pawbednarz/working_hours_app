@@ -5,14 +5,14 @@
             <div class="col-12 col-12-xsmall">
                 Wybierz okres, dla którego chcesz wygenerować raport
             </div>
-            <div class="col-1 report-label">
+            <div class="col-1 input-label">
                 Od:
             </div>
             <div class="col-3 col-4-xlarge col-6-medium">
                 <input class="datepicker" type="text" name="date_from" id="date_from" placeholder="Data od">
             </div>
             <div class="col-8 col-7-xlarge col-5-medium"></div>
-            <div class="col-1 report-label">
+            <div class="col-1 input-label">
                 Do:
             </div>
             <div class="col-3 col-4-xlarge col-6-medium">

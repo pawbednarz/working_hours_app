@@ -150,9 +150,13 @@ class ReportController {
     }
 
     private function generateReport($entryArray, $fromDate, $toDate) {
+        $monthsPl = ["styczen", "luty", "marzec", "kwiecien", "maj", "czerwiec", "lipiec", "sierpien", "wrzesien",
+            "pazdziernik", "listopad", "grudzien"];
+        $monthPl = $monthsPl[intval(date("m")) - 1];
         // head data for csv file
         $csvHead = array("Data", "Miejsce", "Od-Do", "Godziny", "Kierowca", "Dieta", "Dzien wolny");
-        $filename = "file_" . date("m-d-H:i") . ".csv";
+
+        $filename = "raport_" . $monthPl . "_" . date("H_i") . ".csv";
         $this->directoryExistAndCreate(App::getConf()->reports_path);
         $path = App::getConf()->reports_path . $filename;
         // open file and write head data
