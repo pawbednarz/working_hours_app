@@ -19,11 +19,6 @@
         <tr>
             <td>
                 {$entry["from_date"]|substr:8:2}
-{*                {if $entry["from_date"]|substr:0:10 === $entry["to_date"]|substr:0:10 or $entry["to_date"] == ""}*}
-{*                    {$entry["from_date"]|substr:0:10}*}
-{*                {elseif $entry["to_date"] != ""}*}
-{*                    {$entry["from_date"]|substr:0:10}<br>({$entry["to_date"]|substr:0:10})*}
-{*                {/if}*}
             </td>
             <td>{($entry["place"]) ? $entry["place"] : "---"}</td>
             <td>
@@ -51,19 +46,20 @@
         {/foreach}
         {if !empty($entries)}
         <tr>
-                <td></td>
-                <td></td>
-                <td class="align-right">SUMA:</td>
-                <td>
-                    {assign var="result" value="0"}
-                    {foreach $entries as $entry}
-                        {assign var="result" value=$result+$entry["hours"]}
-                    {/foreach}
-                    {$result}
-                </td>
-                <td></td>
-                <td></td>
-                <td></td>
+            <td></td>
+            <td></td>
+            <td class="align-right">SUMA:</td>
+            <td>
+                {assign var="result" value="0"}
+                {foreach $entries as $entry}
+                    {assign var="result" value=$result+$entry["hours"]}
+                {/foreach}
+                {$result}
+            </td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
         </tr>
         {/if}
     </table>
