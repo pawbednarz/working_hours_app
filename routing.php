@@ -16,6 +16,7 @@ Utils::addRoute('showEntries', 'EntryController', "user");
 Utils::addRoute('addEntry', 'EntryController', "user");
 Utils::addRoute('editEntry', 'EntryController', "user");
 Utils::addRoute('deleteEntry', 'EntryController', "user");
+Utils::addRoute('showEntriesForMonth', 'EntryController', "user");
 
 // recepient routes
 Utils::addRoute('showRecipients', 'RecipientController', "user");
@@ -36,10 +37,11 @@ Utils::addRoute('downloadReport', 'ReportController', "user");
 Utils::addRoute('deleteReport', 'ReportController', "user");
 
 // send email routes
-//Utils::addRoute('sendEmail', 'EmailSendController', "user");
+Utils::addRoute('sendEmail', 'EmailSendController', "user");
 Utils::addRoute('showEmails', 'EmailSendController', "user");
-//Utils::addRoute('showEmail', 'EmailSendController', "user");
-//Utils::addRoute('deleteEmail', 'EmailSendController', "user");
+Utils::addRoute('sendEmaill', 'EmailSendController', "user");
+Utils::addRoute('showEmail', 'EmailSendController', "user");
+Utils::addRoute('deleteEmail', 'EmailSendController', "user");
 
 // administrative routes
 Utils::addRoute('adminDashboard', 'AdminController', "admin");
