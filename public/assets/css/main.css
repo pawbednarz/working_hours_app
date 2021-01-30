@@ -2302,7 +2302,7 @@ button,
     -moz-appearance: textfield;
   }
 
-  input[disabled], input[disabled] + label , textarea{
+  input[disabled], input[disabled] + label , textarea[disabled]{
     background-color: #e6ebed;
   }
 
