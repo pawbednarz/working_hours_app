@@ -9,10 +9,6 @@ use core\RoleUtils;
 use core\SessionUtils;
 use core\Validator;
 
-// TODO: dates provided cannot be the same
-//       fromDate have to be earlier date than toDate
-//       set minimal value of dates
-
 class EntryController {
 
     private $months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -38,7 +34,6 @@ class EntryController {
         $this->getEntries();
     }
 
-    // TODO refactor method to work and editForm to use new timepicker
     public function action_addEntry() {
         if ($_SERVER["REQUEST_METHOD"] === "POST") {
             // get request parameters
@@ -116,8 +111,29 @@ class EntryController {
         $this->renderEntriesTable();
     }
 
-    private function getEntries($year=null, $month=null) {
+    public function action_showEntriesForMonth() {
+        $dateFrom = ParamUtils::getFromGet("date_from");
+        if (isset($dateFrom) && $dateFrom != "") {
+            $v = new Validator();
+            $dateFrom = $v->validate($dateFrom, [
+                "required"=>"true",
+                "required_message"=>'Data jest wymagana przy wyborze miesiąca',
+                "date_format"=>"Y-m",
+                "validator_message"=>'Niepoprawny format daty (wymagany: YYYY-mm)'
+            ]);
+            echo $dateFrom->format("Y-m");
+            if ($v->isLastOK()) {
+                $inputDate = $this->getYearAndMonth($dateFrom);
+                $year = $inputDate[0];
+                $month = $inputDate[1];
+                $this->renderMonthEntriesTable($year, $month);
+                exit();
+            }
+        }
+        $this->renderChooseEntryMonth();
+    }
 
+    private function getEntries($year=null, $month=null) {
         $entries = array();
         // if year and month parameters are provided get entries from exact month and year
         // else get entries from current month and year
@@ -174,7 +190,6 @@ class EntryController {
     }
 
     private function editEntry($entryUuid, $place, $fromDate, $toDate, $hours, $wasDriver, $subAllowance, $dayOff) {
-        // TODO fix date saving - its 1970-01-01
         // get year and month - function returns array - idx 0 is year, 1 - month
         $yearAndMonth = $this->getYearAndMonth($fromDate);
         App::getDB()->update("work_hour_entry", [
@@ -220,8 +235,6 @@ class EntryController {
             $paramRequired = false;
         }
 
-        // TODO fix problem when hour/minute is not passed, than it is validated correctly
-
         $fromDate = $v->validate($fromDate, [
             "required"=>"true",
             "required_message"=>'"Data od" jest wymagana przy wprowadzaniu dnia wolnego',
@@ -266,6 +279,12 @@ class EntryController {
             "validator_message"=>'Niepoprawny format "Godzina do" (wymagany: HH:MM)'
         ]);
 
+        $fromDateWithTime = $fromDate->setTime($fromTime->format("H"), $fromTime->format("i"));
+        $toDateWithTime = $toDate->setTime($toTime->format("H"), $toTime->format("i"));
+        if ($fromDateWithTime >= $toDateWithTime) {
+            App::getMessages()->addMessage(new Message('"Data od" musi być wcześniejsza od "Data do" (wliczając godziny)', Message::ERROR));
+        }
+
         return !App::getMessages()->isError();
     }
 
@@ -296,9 +315,12 @@ class EntryController {
         return $this->monthsPl[array_search($this->currentMonth, $this->months)];
     }
 
+    private function getMonthPl($month) {
+        return $this->monthsPl[array_search($month, $this->months)];
+    }
+
     private function getYearAndMonth($fromDate) {
         $year = $fromDate->format("Y");
-        //$year = date("Y", strtotime($fromDate));
         $monthIdx = intval($fromDate->format("m"));
         $month = $this->months[$monthIdx - 1];
         return array($year, $month);
@@ -311,6 +333,13 @@ class EntryController {
         App::getSmarty()->display("entriesTable.tpl");
     }
 
+    private function renderMonthEntriesTable($year, $month) {
+        App::getSmarty()->assign("description", "Godziny w miesiącu " .
+            $this->getMonthPl($month) . " $year");
+        App::getSmarty()->assign("entries", $this->getEntries($year, $month));
+        App::getSmarty()->display("entriesTable.tpl");
+    }
+
     private function renderAddEntryForm() {
         App::getSmarty()->assign("description", "Dodaj wpis");
         App::getSmarty()->display("addEntryForm.tpl");
@@ -320,6 +349,11 @@ class EntryController {
         App::getSmarty()->assign("description", "Edytuj wpis");
         App::getSmarty()->assign("entry", $this->getEntry($entryUuid));
         App::getSmarty()->display("editEntryForm.tpl");
+    }
+
+    private function renderChooseEntryMonth() {
+        App::getSmarty()->assign("description", "Wybierz miesiąc");
+        App::getSmarty()->display("chooseEntryMonth.tpl");
     }
 
 
