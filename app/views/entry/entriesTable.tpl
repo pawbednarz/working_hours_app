@@ -63,6 +63,17 @@
         </tr>
         {/if}
     </table>
-    <a href="{$conf->action_url}addEntry" class="button">Dodaj wpis</a>
+    <div class="row">
+        <div class="col-2 col-12-medium">
+            <a href="{$conf->action_url}addEntry" class="button fit primary">Dodaj wpis</a>
+        </div>
+        <div class="col-10 col-0-medium"></div>
+        {if $action == "showEntriesForMonth"}
+                <div class="col-2 col-12-medium margin-top-1">
+                    <a class="button fit" href="{$conf->action_url}{$action}">Powrót</a>
+                </div>
+                <div class="col-10 col-0-medium"></div>
+        {/if}
+    </div>
 </div>
 {/block}
