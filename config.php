@@ -17,13 +17,19 @@ $conf->app_root = '/working_hours_app/public';   # project subfolder in domain (
 $conf->db_type = 'mysql';
 $conf->db_server = '192.168.0.108';
 $conf->db_name = 'working_hours';
-$conf->db_user = 'working_hours';
-$conf->db_pass = 'working_hours';
+$conf->db_user = getenv("DB_USER");
+$conf->db_pass = getenv("DB_PASS");
 $conf->db_charset = 'utf8';
 
 # ---- Database config - optional values
 $conf->db_port = '3306';
 #$conf->db_prefix = '';
 $conf->db_option = [ PDO::ATTR_CASE => PDO::CASE_NATURAL, PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION ];
+
+# ---- Mail config - needed for sending mails
+$conf->smtp_host = "smtp.gmail.com";
+$conf->smtp_port = 576;
+$conf->smtp_username = getenv("SMTP_USER");
+$conf->smtp_password = getenv("SMTP_PASS");
 
 $conf->reports_path = "/mnt/hdd/projects/working_hours_app/reports/";
