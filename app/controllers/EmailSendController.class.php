@@ -124,7 +124,10 @@ class EmailSendController {
 
     private function getReports() {
         return App::getDB()->select("report", "*", [
-            "user_uuid"=>SessionUtils::load("userUuid", true)
+            "user_uuid"=>SessionUtils::load("userUuid", true),
+            "ORDER"=>[
+                "creation_date"=>"DESC"
+            ]
         ]);
     }
 
