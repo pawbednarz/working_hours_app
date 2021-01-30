@@ -54,6 +54,9 @@ session_set_cookie_params([
 ]);
 session_name("sessionId");
 
+/* Set timezone */
+date_default_timezone_set("Europe/Warsaw");
+
 App:: createAndInitialize($conf);
 
 // store globally used variable go have access to them from every script
