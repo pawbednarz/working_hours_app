@@ -22,7 +22,9 @@ class EmailSendController {
 
         if ($v->validateUuid($emailUuid) && $this->emailExist($emailUuid)) {
             $this->renderShowEmail($emailUuid);
+            exit();
         }
+        $this->renderEmailsTable();
     }
 
     public function action_sendEmail() {
@@ -168,10 +170,14 @@ class EmailSendController {
     }
 
     private function emailExist($emailUuid) {
-        return App::getDB()->has("sent_email", [
+        $result =  App::getDB()->has("sent_email", [
             "uuid"=>$emailUuid,
             "user_uuid"=>SessionUtils::load("userUuid", true)
         ]);
+        if (!$result) {
+            App::getMessages()->addMessage(new Message("Email o podanym UUID nie istnieje", Message::ERROR));
+        }
+        return $result;
     }
 
     private function sendEmail($subject, $text, $recipient, $reportPath) {
