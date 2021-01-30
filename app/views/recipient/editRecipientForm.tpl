@@ -12,7 +12,7 @@
                 <input type="email" name="email" id="email" placeholder="Email" value="{$recipient["email"]}">
             </div>
             <div class="col-2 col-12-medium">
-                <button type="submit" class="primary fit">Dodaj</button>
+                <button type="submit" class="primary fit">Zatwierdź</button>
             </div>
         </div>
     </form>

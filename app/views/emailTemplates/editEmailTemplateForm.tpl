@@ -12,7 +12,7 @@
                 <textarea name="template_text" id="template_text" placeholder="Treść wiadomości" rows="10">{$template["text"]}</textarea>
             </div>
             <div class="col-2 col-12-medium">
-                <button type="submit" class="primary fit">Dodaj</button>
+                <button type="submit" class="primary fit">Zatwierdź</button>
             </div>
         </div>
     </form>

@@ -32,7 +32,7 @@
                 <label for="day_off">Dzień wolny</label>
             </div>
             <div class="col-2 col-12-medium">
-                <button type="submit" class="primary fit">Dodaj</button>
+                <button type="submit" class="primary fit">Zatwierdź</button>
             </div>
         </div>
     </form>
