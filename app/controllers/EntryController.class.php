@@ -121,7 +121,6 @@ class EntryController {
                 "date_format"=>"Y-m",
                 "validator_message"=>'Niepoprawny format daty (wymagany: YYYY-mm)'
             ]);
-            echo $dateFrom->format("Y-m");
             if ($v->isLastOK()) {
                 $inputDate = $this->getYearAndMonth($dateFrom);
                 $year = $inputDate[0];
@@ -279,10 +278,12 @@ class EntryController {
             "validator_message"=>'Niepoprawny format "Godzina do" (wymagany: HH:MM)'
         ]);
 
-        $fromDateWithTime = $fromDate->setTime($fromTime->format("H"), $fromTime->format("i"));
-        $toDateWithTime = $toDate->setTime($toTime->format("H"), $toTime->format("i"));
-        if ($fromDateWithTime >= $toDateWithTime) {
-            App::getMessages()->addMessage(new Message('"Data od" musi być wcześniejsza od "Data do" (wliczając godziny)', Message::ERROR));
+        if ($paramRequired) {
+            $fromDateWithTime = $fromDate->setTime($fromTime->format("H"), $fromTime->format("i"));
+            $toDateWithTime = $toDate->setTime($toTime->format("H"), $toTime->format("i"));
+            if ($fromDateWithTime >= $toDateWithTime) {
+                App::getMessages()->addMessage(new Message('"Data od" musi być wcześniejsza od "Data do" (wliczając godziny)', Message::ERROR));
+            }
         }
 
         return !App::getMessages()->isError();
