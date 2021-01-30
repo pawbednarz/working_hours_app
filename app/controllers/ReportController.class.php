@@ -21,9 +21,13 @@ class ReportController {
             $toDate = ParamUtils::getFromPost("date_to");
 
             if ($this->validateDates($fromDate, $toDate)) {
-                $entries = $this->getEntries($fromDate, $toDate);
-                $this->generateReport($entries, $fromDate, $toDate);
-                App::getMessages()->addMessage(new Message("Pomyślnie wygenerowano raport", Message::INFO));
+                if ($this->directoryExistAndCreate(App::getConf()->reports_path)){
+                    $entries = $this->getEntries($fromDate, $toDate);
+                    $this->generateReport($entries, $fromDate, $toDate);
+                    App::getMessages()->addMessage(new Message("Pomyślnie wygenerowano raport", Message::INFO));
+                } else {
+                    App::getMessages()->addMessage(new Message("Nie udało się wygenerować raportu", Message::ERROR));
+                }
             }
         }
         $this->renderGenerateReportForm();
@@ -125,8 +129,9 @@ class ReportController {
 
     private function directoryExistAndCreate($path) {
         if (!file_exists($path)) {
-            mkdir($path, 0755, true);
+            return mkdir($path, 0755, true);
         }
+        return true;
     }
 
     private function getEntries($fromDate, $toDate) {
@@ -157,7 +162,6 @@ class ReportController {
         $csvHead = array("Data", "Miejsce", "Od-Do", "Godziny", "Kierowca", "Dieta", "Dzien wolny");
 
         $filename = "raport_" . $monthPl . "_" . date("H_i") . ".csv";
-        $this->directoryExistAndCreate(App::getConf()->reports_path);
         $path = App::getConf()->reports_path . $filename;
         // open file and write head data
         $fp = fopen($path, "w");
@@ -165,15 +169,27 @@ class ReportController {
 
         // write each entry to file
         foreach($entryArray as $entry) {
-            $data = array(
-                date("d.m.Y", strtotime($entry["from_date"])),
-                $entry["place"],
-                date("H:i", strtotime($entry["from_date"])) . "-" . date ("H:i", strtotime($entry["to_date"])),
-                str_replace(".", ",", $entry["hours"]),
-                $entry["was_driver"] ? "Tak" : "",
-                $entry["subsistence_allowance"] ? "Tak" : "",
-                $entry["day_off"] ? "Tak" : ""
-            );
+            if ($entry["day_off"]) {
+                $data = array(
+                    date("d.m.Y", strtotime($entry["from_date"])),
+                    "---",
+                    "---",
+                    "---",
+                    "---",
+                    "---",
+                    $entry["day_off"] ? "Tak" : ""
+                );
+            } else {
+                $data = array(
+                    date("d.m.Y", strtotime($entry["from_date"])),
+                    $entry["place"],
+                    date("H:i", strtotime($entry["from_date"])) . "-" . date ("H:i", strtotime($entry["to_date"])),
+                    str_replace(".", ",", $entry["hours"]),
+                    $entry["was_driver"] ? "Tak" : "",
+                    $entry["subsistence_allowance"] ? "Tak" : "",
+                    $entry["day_off"] ? "Tak" : ""
+                );
+            }
             fputcsv($fp, $data);
         }
         // write one blank row and sum all hours in next row
