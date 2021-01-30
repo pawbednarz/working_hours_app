@@ -43,8 +43,10 @@ datepickerTo.setOptions(datepickerOptions);
 
 let today = new Date().toISOString().slice(0, 10)
 
-datepickerFrom.setDate(today);
-datepickerTo.setDate(today);
+if (dateFrom.value === "") {
+    datepickerFrom.setDate(today);
+    datepickerTo.setDate(today);
+}
 
 dateFrom.addEventListener("changeDate", function() {
     datepickerTo.setDate(datepickerFrom.getDate());
