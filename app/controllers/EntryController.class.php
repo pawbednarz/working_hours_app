@@ -74,20 +74,22 @@ class EntryController {
                 $place = ParamUtils::getFromPost("place");
                 $fromDate = ParamUtils::getFromPost("date_from");
                 $toDate = ParamUtils::getFromPost("date_to");
-                $fromTime = intval(ParamUtils::getFromPost("time_to"));
-                $toTime = intval(ParamUtils::getFromPost("time_from"));
+                $fromTime = ParamUtils::getFromPost("time_from");
+                $toTime = ParamUtils::getFromPost("time_to");
                 $wasDriver = ParamUtils::getFromPost("driver") == "true";
                 $subAllowance = ParamUtils::getFromPost("subsistence_allowance") == "true";
                 $dayOff = ParamUtils::getFromPost("day_off") == "true";
                 $validationResult = $this->validateEntryData($place, $fromDate, $toDate, $fromTime,
                     $toTime, $dayOff);
                 if ($validationResult) {
-                    $fromTime = $this->formatDateAndTime($fromDate, $fromTime);
-                    $toTime = $this->formatDateAndTime($toDate, $toTime);
-                    $hours = $this->countHoursDifference($fromTime, $toTime);
-
-                    $this->editEntry($entryUuid, $place, $fromTime, $toTime, $hours, $wasDriver, $subAllowance, $dayOff);
-                    App::getMessages()->addMessage(new Message("Pomyślnie edytowano wpis", Message::INFO));
+                    if ($dayOff) {
+                        $this->editToDayOffEntry($entryUuid, $fromDate);
+                    } else {
+                        $fromDateAndTime = $this->formatDateAndTime($fromDate, $fromTime);
+                        $toDateAndTime = $this->formatDateAndTime($toDate, $toTime);
+                        $hours = $this->countHoursDifference($fromDateAndTime, $toDateAndTime);
+                        $this->editEntry($entryUuid, $place, $fromDateAndTime, $toDateAndTime, $hours, $wasDriver, $subAllowance, $dayOff);
+                    }
                 }
             }
             $this->renderEditEntryForm($entryUuid);
@@ -169,7 +171,7 @@ class EntryController {
             App::getDB()->insert("work_hour_entry", [
                 "uuid"=>generate_uuid(),
                 "from_date"=> $fromDate->format("Y-m-d H:i"),
-                "to_date"=> is_null($toDate) ? null : $toDate->format("Y-m-d H:i"),
+                "to_date"=> $dayOff ? null : $toDate->format("Y-m-d H:i"),
                 "hours"=> $hours,
                 "place"=>$place,
                 "was_driver"=>$wasDriver ? 1 : 0,
@@ -192,8 +194,8 @@ class EntryController {
         // get year and month - function returns array - idx 0 is year, 1 - month
         $yearAndMonth = $this->getYearAndMonth($fromDate);
         App::getDB()->update("work_hour_entry", [
-            "from_date"=> $fromDate,
-            "to_date"=> $toDate,
+            "from_date"=> $fromDate->format("Y-m-d H:i"),
+            "to_date"=> $dayOff ? null : $toDate->format("Y-m-d H:i"),
             "hours"=> $hours,
             "place"=>$place,
             "was_driver"=>$wasDriver ? 1 : 0,
@@ -205,6 +207,12 @@ class EntryController {
             "uuid"=>$entryUuid,
             "user_uuid"=>SessionUtils::load("userUuid", true)
         ]);
+        App::getMessages()->addMessage(new Message("Pomyślnie edytowano wpis", Message::INFO));
+    }
+
+    private function editToDayOffEntry($entryUuid, $fromDate) {
+        $fromDate->setTime(0, 0);
+        $this->editEntry($entryUuid, null, $fromDate, null, null, null, null, 1);
     }
 
     private function deleteEntry($entryUuid) {
