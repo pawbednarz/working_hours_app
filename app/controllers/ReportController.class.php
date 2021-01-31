@@ -154,14 +154,28 @@ class ReportController {
         ]);
     }
 
+    private function checkReportsWithSameTime($hourAndMinute) {
+        return App::getDB()->count("report", [
+            "filename[~]"=> "%" . $hourAndMinute . "%",
+            "user_uuid"=>SessionUtils::load("userUuid", true)
+        ]);
+    }
+
     private function generateReport($entryArray, $fromDate, $toDate) {
         $monthsPl = ["styczen", "luty", "marzec", "kwiecien", "maj", "czerwiec", "lipiec", "sierpien", "wrzesien",
             "pazdziernik", "listopad", "grudzien"];
         $monthPl = $monthsPl[intval(date("m")) - 1];
         // head data for csv file
         $csvHead = array("Data", "Miejsce", "Od-Do", "Godziny", "Kierowca", "Dieta", "Dzien wolny");
+        $hourAndMinute = date("H_i");
+        $reportsCount = $this->checkReportsWithSameTime($hourAndMinute);
+        $filename = "";
+        if ($reportsCount == 0) {
+            $filename = "raport_" . $monthPl . "_" . date("H_i") . ".csv";
+        } else if ($reportsCount > 0) {
+            $filename = "raport_" . $monthPl . "_" . date("H_i") . "(" . $reportsCount  .").csv";
+        }
 
-        $filename = "raport_" . $monthPl . "_" . date("H_i") . ".csv";
         $path = App::getConf()->reports_path . $filename;
         // open file and write head data
         $fp = fopen($path, "w");
