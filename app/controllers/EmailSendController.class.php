@@ -39,9 +39,11 @@ class EmailSendController {
                 $recipient = $this->getOneFromDb("recipient", $recipientUuid);
                 $report = $this->getOneFromDb("report", $reportUuid);
 
-                $this->sendEmail($template["subject"], $template["text"], $recipient,
+                $wasSent = $this->sendEmail($template["subject"], $template["text"], $recipient,
                     App::getConf()->reports_path . $report["filename"]);
-                $this->addEmail($template["subject"], $template["text"], $report["uuid"], $recipient["uuid"]);
+                if ($wasSent) {
+                    $this->addEmail($template["subject"], $template["text"], $report["uuid"], $recipient["uuid"]);
+                }
             }
         }
         $this->renderSendEmail();
@@ -209,6 +211,7 @@ class EmailSendController {
         } else {
             App::getMessages()->addMessage(new Message("Nie udało się wysłać wiadomości", Message::ERROR));
         }
+        return $result;
     }
 
     private function renderEmailsTable() {
