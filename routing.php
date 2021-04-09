@@ -44,8 +44,8 @@ Utils::addRoute('showEmail', 'EmailSendController', "user");
 Utils::addRoute('deleteEmail', 'EmailSendController', "user");
 
 // administrative routes
-Utils::addRoute('adminDashboard', 'AdminController', "admin");
+Utils::addRoute('adminDashboard', 'AdminController');
 
 // user routes (only for administrator)
-Utils::addRoute('addUser', 'AdminController', "admin");
-Utils::addRoute('editUser', 'AdminController', "admin");
+Utils::addRoute('addUser', 'AdminController');
+Utils::addRoute('editUser', 'AdminController');
