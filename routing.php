@@ -8,7 +8,7 @@ App::getRouter()->setLoginRoute('login'); #action to forward if no permissions
 
 // login / logout routes
 Utils::addRoute('login', 'LoginController');
-Utils::addRoute('logout', 'LoginController');
+Utils::addRoute('logout', 'LoginController', ["admin", "user"]);
 
 // entry routes
 Utils::addRoute('dashboard', 'EntryController', ["admin", "user"]);
@@ -44,8 +44,8 @@ Utils::addRoute('showEmail', 'EmailSendController', "user");
 Utils::addRoute('deleteEmail', 'EmailSendController', "user");
 
 // administrative routes
-Utils::addRoute('adminDashboard', 'AdminController');
+Utils::addRoute('adminDashboard', 'AdminController', "admin");
 
 // user routes (only for administrator)
-Utils::addRoute('addUser', 'AdminController');
-Utils::addRoute('editUser', 'AdminController');
+Utils::addRoute('addUser', 'AdminController', "admin");
+Utils::addRoute('editUser', 'AdminController', "admin");
