@@ -14,7 +14,7 @@ class RecipientService {
         ]);
     }
 
-    private function getRecipient($recipientUuid) {
+    public function getRecipient($recipientUuid) {
         $data = App::getDB()->select("recipient", "*", [
             "uuid"=>$recipientUuid,
             "user_uuid"=>SessionUtils::load("userUuid", true)
@@ -23,7 +23,7 @@ class RecipientService {
     }
 
     public function addRecipient($firstName, $lastName, $email) {
-        return App::getDB()->insert("recipient", [
+        App::getDB()->insert("recipient", [
             "uuid"=>generate_uuid(),
             "first_name"=>$firstName,
             "last_name"=>$lastName,
@@ -33,7 +33,7 @@ class RecipientService {
     }
 
     public function editRecipient($recipientUuid, $firstName, $lastName, $email) {
-        return App::getDB()->update("recipient", [
+        App::getDB()->update("recipient", [
             "first_name"=>$firstName,
             "last_name"=>$lastName,
             "email"=>$email

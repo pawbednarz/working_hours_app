@@ -22,7 +22,7 @@ class ReportService {
     }
 
     private function addReport($filename, $fromDate, $toDate) {
-        return App::getDB()->insert("report", [
+        App::getDB()->insert("report", [
             "uuid"=>generate_uuid(),
             "filename"=>$filename,
             "creation_date"=>date("Y-m-d H:i"),
