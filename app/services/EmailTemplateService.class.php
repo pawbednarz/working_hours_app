@@ -15,7 +15,7 @@ class EmailTemplateService {
         ]);
     }
 
-    private function getTemplate($templateUuid) {
+    public function getTemplate($templateUuid) {
         $data = App::getDB()->select("email_template", "*", [
             "uuid"=>$templateUuid,
             "user_uuid"=>SessionUtils::load("userUuid", true)
@@ -24,7 +24,7 @@ class EmailTemplateService {
     }
 
     public function addTemplate($templateName, $templateSubject, $templateText) {
-        return App::getDB()->insert("email_template", [
+        App::getDB()->insert("email_template", [
             "uuid"=>generate_uuid(),
             "name"=>$templateName,
             "subject"=>$templateSubject,
@@ -34,7 +34,7 @@ class EmailTemplateService {
     }
 
     public function editTemplate($templateUuid, $templateName, $templateSubject, $templateText) {
-        return App::getDB()->update("email_template", [
+        App::getDB()->update("email_template", [
             "name"=>$templateName,
             "subject"=>$templateSubject,
             "text"=>$templateText

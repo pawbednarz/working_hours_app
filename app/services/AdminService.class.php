@@ -45,7 +45,7 @@ class AdminService {
     }
 
     public function editUser($uuid, $firstName, $lastName, $email, $role, $isActive) {
-        return App::getDB()->update("user", [
+        App::getDB()->update("user", [
             "first_name"=>$firstName,
             "last_name"=>$lastName,
             "email"=>$email,

@@ -58,13 +58,6 @@ class EmailSendService {
         ])[0];
     }
 
-    public function getOneFromDb ($table, $uuid) {
-        return App::getDB()->select($table, "*", [
-            "uuid"=>$uuid,
-            "user_uuid"=>SessionUtils::load("userUuid", true)
-        ])[0];
-    }
-
     public function addEmail($subject, $text, $reportUuid, $recipientUuid) {
         $emailUuid = generate_uuid();
         App::getDB()->insert("sent_email", [

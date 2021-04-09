@@ -3,6 +3,9 @@
 namespace app\controllers;
 
 use app\services\EmailSendService;
+use app\services\EmailTemplateService;
+use app\services\RecipientService;
+use app\services\ReportService;
 use core\App;
 use core\Message;
 use core\ParamUtils;
@@ -12,6 +15,9 @@ use PHPMailer\PHPMailer\PHPMailer;
 class EmailSendController {
 
     private $emailSendService;
+    private $emailTemplateService;
+    private $recipientService;
+    private $reportService;
 
     function __construct() {
         $this->emailSendService = new EmailSendService();
@@ -40,9 +46,12 @@ class EmailSendController {
             $v = new Validator();
 
             if ($v->validateUuid($templateUuid) && $v->validateUuid($recipientUuid) && $v->validateUuid($reportUuid)) {
-                $template = $this->emailSendService->getOneFromDb("email_template", $templateUuid);
-                $recipient = $this->emailSendService->getOneFromDb("recipient", $recipientUuid);
-                $report = $this->emailSendService->getOneFromDb("report", $reportUuid);
+                $this->emailTemplateService = new EmailTemplateService();
+                $this->reportService = new ReportService();
+                $this->recipientService = new RecipientService();
+                $template = $this->emailTemplateService->getTemplate($templateUuid);
+                $recipient = $this->recipientService->getRecipient($recipientUuid);
+                $report = $this->reportService->getReport($reportUuid);
 
                 $wasSent = $this->emailSendService->sendEmail($template["subject"], $template["text"], $recipient,
                     App::getConf()->reports_path . $report["filename"]);
