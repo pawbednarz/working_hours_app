@@ -1,5 +1,5 @@
 <?php
-$conf->debug = false; # set true during development and use in your code (for instance check if true to send additional message)
+$conf->debug = true; # set true during development and use in your code (for instance check if true to send additional message)
 
 if ($conf->debug) {
     ini_set('display_errors', 1);
@@ -17,8 +17,8 @@ $conf->app_root = '/working_hours_app/public';   # project subfolder in domain (
 $conf->db_type = 'mysql';
 $conf->db_server = '192.168.0.108';
 $conf->db_name = 'working_hours';
-$conf->db_user = getenv("DB_USER");
-$conf->db_pass = getenv("DB_PASS");
+$conf->db_user = "working_hours";
+$conf->db_pass = "working_hours";
 $conf->db_charset = 'utf8';
 
 # ---- Database config - optional values
