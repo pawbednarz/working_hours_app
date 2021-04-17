@@ -11,17 +11,9 @@ use core\Validator;
 
 class EntryController {
 
-    private $months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-    private $monthsPl = ["Styczeń", "Luty", "Marzec", "Kwiecień", "Maj", "Czerwiec", "Lipiec", "Sierpień", "Wrzesień",
-        "Październik", "Listopad", "Grudzień"];
-
-    private $currentYear;
-    private $currentMonth;
     private $entryService;
 
     function __construct() {
-        $this->currentYear = date("Y");
-        $this->currentMonth = date("M");
         $this->entryService = new EntryService();
     }
 

@@ -9,6 +9,18 @@ use core\Validator;
 
 class EntryService {
 
+    private $months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    private $monthsPl = ["Styczeń", "Luty", "Marzec", "Kwiecień", "Maj", "Czerwiec", "Lipiec", "Sierpień", "Wrzesień",
+        "Październik", "Listopad", "Grudzień"];
+
+    private $currentYear;
+    private $currentMonth;
+
+    function __construct() {
+        $this->currentYear = date("Y");
+        $this->currentMonth = date("M");
+    }
+
     public function getEntries($year=null, $month=null) {
         $entries = array();
         // if year and month parameters are provided get entries from exact month and year
