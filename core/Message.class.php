@@ -29,7 +29,7 @@ class Message {
     }
 
     public function getTypeName() {
-        switch ($type) {
+        switch ($this->type) {
             case Message::ERROR: return 'error';
             case Message::WARNING: return 'warning';
             case Message::INFO: return 'info';
