@@ -82,6 +82,10 @@ class AdminService {
             return false;
         }
 
+        if ($this->userExistByEmail($email)) {
+            return false;
+        }
+
         $v = new Validator();
         // TODO implement stronger password policy
         $password = $v->validate($password, [
@@ -133,10 +137,6 @@ class AdminService {
 
         if (!in_array($role, ["admin", "user"])) {
             App::getMessages()->addMessage(new Message("Jedyne dozwolone role to admin oraz user", Message::ERROR));
-        }
-
-        if ($this->userExistByEmail($email)) {
-            return false;
         }
 
         return !App::getMessages()->isError();
