@@ -40,7 +40,7 @@ class AdminService {
         } catch (\PDOException $e) {
             // TODO write to logs
             // echo $e;
-            App::getMessages()->addMessage("Wystąpił błąd podczas dodawania użytkownika. Spróbuj ponownie, lub skontaktuj się z administratorem systemu");
+            App::getMessages()->addMessage("Wystąpił błąd podczas dodawania użytkownika. Spróbuj ponownie.", Message::ERROR);
         }
     }
 
