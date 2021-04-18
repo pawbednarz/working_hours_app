@@ -173,7 +173,7 @@ class EntryService {
             "validator_message"=>'Niepoprawny format "Godzina do" (wymagany: HH:MM)'
         ]);
 
-        if ($paramRequired) {
+        if ($paramRequired && !empty($toTime) && !empty($fromTime)) {
             $fromDateWithTime = $fromDate->setTime($fromTime->format("H"), $fromTime->format("i"));
             $toDateWithTime = $toDate->setTime($toTime->format("H"), $toTime->format("i"));
             if ($fromDateWithTime >= $toDateWithTime) {
