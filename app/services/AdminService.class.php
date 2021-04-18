@@ -79,7 +79,6 @@ class AdminService {
     public function validateUserData(&$firstName, &$lastName, &$email, &$password, $passwordRepeat, $role) {
         if ($password != $passwordRepeat) {
             App::getMessages()->addMessage(new Message("Wprowadzone hasła nie są takie same", Message::ERROR));
-            return false;
         }
 
         if ($this->userExistByEmail($email)) {

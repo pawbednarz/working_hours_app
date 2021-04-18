@@ -35,8 +35,6 @@ class AdminController {
             if ($this->adminService->validateUserData($firstName, $lastName, $email, $password, $passwordRepeat, $role)) {
                 $this->adminService->addUser($firstName, $lastName, $email, $password, $role, $isActive);
                 App::getMessages()->addMessage(new Message("Pomyslnie dodano użytkownika", Message::INFO));
-            } else {
-                App::getMessages()->addMessage(new Message("Nie udało się dodać użytkownika", Message::ERROR));
             }
         }
         $this->adminService->renderAddUserForm();
