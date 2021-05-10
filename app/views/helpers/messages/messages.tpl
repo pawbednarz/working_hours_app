@@ -1,7 +1,9 @@
 {if !$msgs->isEmpty()}
-    <ul>
         {foreach $msgs->getMessages() as $msg}
-            <li>{$msg->text}</li>
+            <div class="{if $msg->isInfo()}isa_success{/if}
+                        {if $msg->isWarning()}isa_warning{/if}
+                        {if $msg->isError()}isa_error{/if}">
+                {$msg->text}
+            </div>
         {/foreach}
-    </ul>
 {/if}

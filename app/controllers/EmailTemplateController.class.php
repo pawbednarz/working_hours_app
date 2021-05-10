@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\services\EmailTemplateService;
 use core\App;
 use core\Message;
 use core\ParamUtils;
@@ -12,8 +13,14 @@ use core\Validator;
 
 class EmailTemplateController {
 
+    private $emailTemplateService;
+
+    function __construct() {
+        $this->emailTemplateService = new EmailTemplateService();
+    }
+
     public function action_showEmailTemplates() {
-        $this->renderEmailTemplatesTable();
+        $this->emailTemplateService->renderEmailTemplatesTable();
     }
 
     public function action_addEmailTemplate() {
@@ -21,33 +28,33 @@ class EmailTemplateController {
             $templateName = ParamUtils::getFromPost("template_name");
             $templateSubject = ParamUtils::getFromPost("template_subject");
             $templateText = ParamUtils::getFromPost("template_text");
-            if ($this->validateEmailTemplateData($templateName, $templateSubject, $templateText)) {
-                $this->addTemplate($templateName, $templateSubject, $templateText);
+            if ($this->emailTemplateService->validateEmailTemplateData($templateName, $templateSubject, $templateText)) {
+                $this->emailTemplateService->addTemplate($templateName, $templateSubject, $templateText);
                 App::getMessages()->addMessage(new Message("Pomyślnie dodano szablon wiadomości", Message::INFO));
             }
         }
-        $this->renderAddEmailTemplateForm();
+        $this->emailTemplateService->renderAddEmailTemplateForm();
     }
 
     public function action_editEmailTemplate() {
         $templateUuid = ParamUtils::getFromGet("email_template_uuid");
         $v = new Validator();
 
-        if ($v->validateUuid($templateUuid) && $this->templateExist($templateUuid)) {
+        if ($v->validateUuid($templateUuid) && $this->emailTemplateService->templateExist($templateUuid)) {
             if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 $templateName = ParamUtils::getFromPost("template_name");
                 $templateSubject = ParamUtils::getFromPost("template_subject");
                 $templateText = ParamUtils::getFromPost("template_text");
 
-                if ($this->validateEmailTemplateData($templateName, $templateSubject, $templateText)) {
-                    $this->editTemplate($templateUuid, $templateName, $templateSubject, $templateText);
+                if ($this->emailTemplateService->validateEmailTemplateData($templateName, $templateSubject, $templateText)) {
+                    $this->emailTemplateService->editTemplate($templateUuid, $templateName, $templateSubject, $templateText);
                     App::getMessages()->addMessage(new Message("Pomyślnie edytowano szablon", Message::INFO));
                 }
             }
-            $this->renderEditEmailTemplateForm($templateUuid);
+            $this->emailTemplateService->renderEditEmailTemplateForm($templateUuid);
             exit();
         }
-        $this->renderEmailTemplatesTable();
+        $this->emailTemplateService->renderEmailTemplatesTable();
     }
 
     public function action_deleteEmailTemplate() {
@@ -55,121 +62,13 @@ class EmailTemplateController {
         $v = new Validator();
 
         if ($v->validateUuid($templateUuid)) {
-            $result = $this->deleteTemplate($templateUuid);
+            $result = $this->emailTemplateService->deleteTemplate($templateUuid);
             if ($result) {
                 App::getMessages()->addMessage(new Message("Pomyślnie usunięto szablon", Message::INFO));
             } else {
                 App::getMessages()->addMessage(new Message("Nie udało się usunąć szablonu", Message::ERROR));
             }
         }
-        $this->renderEmailTemplatesTable();
-    }
-
-    private function getTemplates() {
-        return App::getDB()->select("email_template", "*", [
-            "user_uuid"=>SessionUtils::load("userUuid", true)
-        ]);
-    }
-
-    private function getTemplate($templateUuid) {
-        $data = App::getDB()->select("email_template", "*", [
-            "uuid"=>$templateUuid,
-            "user_uuid"=>SessionUtils::load("userUuid", true)
-        ]);
-        return $data[0];
-    }
-
-    private function addTemplate($templateName, $templateSubject, $templateText) {
-        return App::getDB()->insert("email_template", [
-            "uuid"=>generate_uuid(),
-            "name"=>$templateName,
-            "subject"=>$templateSubject,
-            "text"=>$templateText,
-            "user_uuid"=>SessionUtils::load("userUuid", true)
-        ]);
-    }
-
-    private function editTemplate($templateUuid, $templateName, $templateSubject, $templateText) {
-        return App::getDB()->update("email_template", [
-            "name"=>$templateName,
-            "subject"=>$templateSubject,
-            "text"=>$templateText
-        ], [
-            "uuid"=>$templateUuid,
-            "user_uuid"=>SessionUtils::load("userUuid", true)
-        ]);
-    }
-
-    private function deleteTemplate($templateUuid) {
-        $data = App::getDB()->delete("email_template", [
-            "uuid"=>$templateUuid,
-            "user_uuid"=>SessionUtils::load("userUuid", true)
-        ]);
-        return $data->rowCount();
-    }
-
-    private function templateExist($templateUuid) {
-        $result = App::getDB()->has("email_template", [
-            "uuid"=>$templateUuid,
-            "user_uuid"=>SessionUtils::load("userUuid", true)
-        ]);
-        if (!$result) {
-            App::getMessages()->addMessage(new Message("Szablon o podanym UUID nie istnieje", Message::ERROR));
-        }
-        return $result;
-    }
-
-    private function validateEmailTemplateData(&$templateName, &$templateSubject, &$templateText) {
-        $v = new Validator();
-
-        $templateName = $v->validate($templateName, [
-            "required"=>"true",
-            "required_message"=>'"Nazwa szablonu" jest wymagana',
-            "trim"=>"true",
-            "escape"=>"true",
-            "min_length"=>3,
-            "max_length"=>50,
-            "validator_message"=>'"Nazwa szablonu" musi zawierać od 3 do 50 znaków'
-        ]);
-
-        $templateSubject = $v->validate($templateSubject, [
-            "required"=>"true",
-            "required_message"=>'"Temat" jest wymagany',
-            "trim"=>"true",
-            "escape"=>"true",
-            "min_length"=>3,
-            "max_length"=>60,
-            "validator_message"=>'"Temat" musi zawierać od 3 do 60 znaków'
-        ]);
-
-        $templateText = $v->validate($templateText, [
-            "required"=>"true",
-            "required_message"=>'"Tekst wiadomości" jest wymagany',
-            "trim"=>"true",
-            "escape"=>"true",
-            "min_length"=>10,
-            "max_length"=>1000,
-            "validator_message"=>'"Tekst wiadomości" musi zawierać od 10 do 1000 znaków'
-        ]);
-
-        return !App::getMessages()->isError();
-    }
-
-    private function renderEmailTemplatesTable() {
-        App::getSmarty()->assign("description", "Szablony wiadomości email");
-        App::getSmarty()->assign("templates", $this->getTemplates());
-        App::getSmarty()->display("emailTemplatesTable.tpl");
-    }
-
-    private function renderAddEmailTemplateForm() {
-        App::getSmarty()->assign("description", "Dodaj szablon");
-        App::getSmarty()->display("addEmailTemplateForm.tpl");
-    }
-
-    private function renderEditEmailTemplateForm($templateUuid) {
-        App::getSmarty()->assign("description", "Edytuj szablon");
-        App::getSmarty()->assign("template", $this->getTemplate($templateUuid));
-        App::getSmarty()->display("editEmailTemplateForm.tpl");
-
+        $this->emailTemplateService->renderEmailTemplatesTable();
     }
 }

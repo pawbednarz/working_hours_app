@@ -44,4 +44,5 @@
 <script src="{$conf->assets_url}js/datepicker/picker.js"></script>
 <script src="{$conf->assets_url}js/datepicker/datepicker.min.js"></script>
 <script src="{$conf->assets_url}js/datepicker/add_entry_form.js"></script>
+
 {/block}
