@@ -1,6 +1,6 @@
 <div id="sidebar">
     <div class="inner">
-        <nav id="menu">
+        <nav class="menu">
             <header class="major">
                 <h2>Menu</h2>
             </header>
