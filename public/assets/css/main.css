@@ -2375,3 +2375,7 @@ button,
   display: inline;
   content: '\f078';
 }
+
+#pages_count,#page_num {
+  display: none;
+}

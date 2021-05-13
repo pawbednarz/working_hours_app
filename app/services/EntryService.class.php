@@ -6,6 +6,7 @@ use core\App;
 use core\Message;
 use core\SessionUtils;
 use core\Validator;
+use function mysql_xdevapi\getSession;
 
 class EntryService {
 
@@ -21,7 +22,9 @@ class EntryService {
         $this->currentMonth = date("M");
     }
 
-    public function getEntries($year=null, $month=null) {
+    public function getEntries($year=null, $month=null, $size=10, $page=1) {
+        $limitDown = $size * ($page - 1);
+        $limitUp = $size * $page;
         $entries = array();
         // if year and month parameters are provided get entries from exact month and year
         // else get entries from current month and year
@@ -30,14 +33,40 @@ class EntryService {
                 "month"=>$month,
                 "year"=>$year,
                 "user_uuid"=>SessionUtils::load("userUuid", true),
-                "ORDER"=>"from_date"
+                "ORDER"=>"from_date",
+                "LIMIT"=>[$limitDown, $limitUp]
             ]);
         } else {
             $entries = App::getDB()->select("work_hour_entry", "*", [
-                "user_uuid"=>SessionUtils::load("userUuid", true)
+                "user_uuid"=>SessionUtils::load("userUuid", true),
+                "ORDER"=>"from_date",
+                "LIMIT"=>[$limitDown, $limitUp]
             ]);
         }
         return $entries;
+    }
+
+    private function getEntriesCount($year=null, $month=null, $size=10, $page=1) {
+        $limitDown = $size * ($page - 1);
+        $limitUp = $size * $page;
+        $entries = 0;
+        if(isset($year) && is_numeric($year) && isset($month) && in_array($month, $this->months)) {
+            $entries = App::getDB()->count("work_hour_entry", "*", [
+                "month"=>$month,
+                "year"=>$year,
+                "user_uuid"=>SessionUtils::load("userUuid", true),
+                "ORDER"=>"from_date",
+                "LIMIT"=>[$limitDown, $limitUp]
+            ]);
+        } else {
+            $entries = App::getDB()->count("work_hour_entry", "*", [
+                "user_uuid"=>SessionUtils::load("userUuid", true),
+                "ORDER"=>"from_date",
+                "LIMIT"=>[$limitDown, $limitUp]
+            ]);
+        }
+        $pages = ceil($entries / $size);
+        return $pages;
     }
 
     private function getEntry($entryUuid) {
@@ -222,9 +251,78 @@ class EntryService {
         return array($year, $month);
     }
 
+    public function getFilteredEntries($place, $hours, $wasDriver, $subAllowance, $dayOff, $filter, $size=10, $page=1) {
+        $where = [
+            "user_uuid"=>SessionUtils::load("userUuid", true),
+            "ORDER"=>[
+                "from_date"
+        ]
+        ];
+        if (!empty($place)) {
+            $where["place[~]"] = $place;
+        }
+        if (!empty($hours)) {
+            $where["hours"] = $hours;
+        }
+        if (!is_null($wasDriver)) {
+            switch ($wasDriver) {
+                case "true":
+                    $where["was_driver"] = 1;
+                    break;
+                case "false":
+                    $where["was_driver"] = 0;
+                    break;
+            }
+        }
+        if (!is_null($subAllowance)) {
+            switch ($subAllowance) {
+                case "true":
+                    $where["subsistence_allowance"] = 1;
+                    break;
+                case "false":
+                    $where["subsistence_allowance"] = 0;
+                    break;
+            }
+        }
+        if (!is_null($dayOff)) {
+            switch ($dayOff) {
+                case "true":
+                    $where["day_off"] = 1;
+                    break;
+                case "false":
+                    $where["day_off"] = 0;
+                    break;
+            }
+        }
+        $sizeFrom = 0;
+        $sizeTo = $size;
+        if ($page > 1) {
+            $sizeFrom = ($page - 1) * $size;
+            $sizeTo = $page * $size;
+        }
+
+        $count = App::getDB()->count("work_hour_entry", "*", $where);
+        $where["LIMIT"] = [$sizeFrom, $sizeTo];
+        $pages = ceil($count / $size);
+
+        if (($filter == "true") || ($count < $sizeFrom)) {
+            $sizeFrom = 0;
+            $sizeTo = $size;
+            $where["LIMIT"] = [$sizeFrom, $sizeTo];
+            $page = 1;
+        }
+
+        App::getSmarty()->assign("page", $page);
+        App::getSmarty()->assign("pages", $pages);
+        return App::getDB()->select("work_hour_entry", "*", $where);
+    }
+
     public function renderEntriesTable() {
         App::getSmarty()->assign("description", "Godziny w bieżącym miesiącu (" .
             $this->getCurrentMonthPl() . " $this->currentYear)");
+        App::getSmarty()->assign("pages_count", $this->getEntriesCount($this->currentYear, $this->currentMonth));
+        App::getSmarty()->assign("page", 1);
+        App::getSmarty()->assign("size", 10);
         App::getSmarty()->assign("entries", $this->getEntries($this->currentYear, $this->currentMonth));
         App::getSmarty()->display("entriesTable.tpl");
     }
@@ -232,6 +330,9 @@ class EntryService {
     public function renderMonthEntriesTable($year, $month) {
         App::getSmarty()->assign("description", "Godziny w miesiącu " .
             $this->getMonthPl($month) . " $year");
+        App::getSmarty()->assign("pages_count", $this->getEntriesCount($year, $month));
+        App::getSmarty()->assign("page", 1);
+        App::getSmarty()->assign("size", 10);
         App::getSmarty()->assign("entries", $this->getEntries($year, $month));
         App::getSmarty()->display("entriesTable.tpl");
     }
@@ -250,5 +351,10 @@ class EntryService {
     public function renderChooseEntryMonth() {
         App::getSmarty()->assign("description", "Wybierz miesiąc");
         App::getSmarty()->display("chooseEntryMonth.tpl");
+    }
+
+    public function renderAjaxEntriesPage($place, $hours, $wasDriver, $subAllowance, $dayOff, $filter, $size, $page) {
+        App::getSmarty()->assign("entries", $this->getFilteredEntries($place, $hours, $wasDriver, $subAllowance, $dayOff, $filter, $size, $page));
+        App::getSmarty()->display("table.tpl");
     }
 }

@@ -49,3 +49,7 @@ Utils::addRoute('adminDashboard', 'AdminController', "admin");
 // user routes (only for administrator)
 Utils::addRoute('addUser', 'AdminController', "admin");
 Utils::addRoute('editUser', 'AdminController', "admin");
+
+// AJAX endpoints
+Utils::addRoute("getEntriesAjax", "EntryController", "user");
+Utils::addRoute("getEntriesAjaxPage", "EntryController", "user");

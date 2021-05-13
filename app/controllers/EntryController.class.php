@@ -128,4 +128,16 @@ class EntryController {
         }
         $this->entryService->renderChooseEntryMonth();
     }
+
+    public function action_getEntriesAjaxPage() {
+        $size = ParamUtils::getFromGet("size");
+        $page = ParamUtils::getFromGet("page");
+        $filter = ParamUtils::getFromGet("filter");
+        $place = ParamUtils::getFromPost("place");
+        $hours = ParamUtils::getFromPost("hours");
+        $wasDriver = ParamUtils::getFromPost("driver");
+        $subAllowance = ParamUtils::getFromPost("subsistence_allowance");
+        $dayOff = ParamUtils::getFromPost("day_off");
+        $this->entryService->renderAjaxEntriesPage($place, $hours, $wasDriver, $subAllowance, $dayOff, $filter, $size, $page);
+    }
 }
